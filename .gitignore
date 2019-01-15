@@ -1,0 +1,5 @@
+*.o
+bin/*.exe
+*.sublime-workspace
+src/dis
+eval.c
