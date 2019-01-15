@@ -121,7 +121,7 @@ print_title (void)
     if (flag) {
 	flag = 0;
 
-	eprintf ("ソースコードジェネレータ for X680x0"
+	eprintf ("Source Code Generator for X680x0"
 #ifdef __linux__
 						" (Linux cross)"
 #endif
@@ -188,7 +188,7 @@ loadfile (char* filename)
     struct stat	statbuf;
 
     if ((handle = open (filename, O_BINARY | O_RDONLY)) == -1)
-	err ("%s をオープン出来ません.\n", filename);
+	err ("Could not open %s\n", filename);
 
     if (fstat( handle , &statbuf) < 0)
 	err ("fstat failed.\n");
@@ -211,7 +211,7 @@ loadfile (char* filename)
 	    eprintf ("ID=%04X\n", HeadOSK.head);
 os9head_error:
 	    close(handle);
-	    err ("OS-9/680x0 のモジュールではありません.\n");
+	    err ("It is not a module of OS-9/680x0.\n");
 	}
 	switch (HeadOSK.type & 0x0f00) {
 	    case 0x0100:	/* Program */
@@ -231,7 +231,7 @@ os9head_error:
 		break;
 	    default:
 		close(handle);
-		err ("このモジュールタイプはサポートしていません.\n");
+		err ("This module type is not supported.\n");
 	}
 	lseek(handle, Head.base, 0);
 	Head.exec = HeadOSK.exec;
@@ -290,7 +290,7 @@ os9head_error:
 	if (read (handle, (char *)&fh, sizeof (fh)) != sizeof (fh)) {
 filetype_error:
 	    close (handle);
-	    err ("このようなファイルは取り扱っておりません.\n");
+	    err ("Such a file is not handled.\n");
 	}
 	Head.head = fh.head;
 	Head.reserve2 = fh.reserve2;
@@ -324,7 +324,7 @@ filetype_error:
 
     if (read (handle, (char*)top, bytes) != bytes) {
 	close (handle);
-	err ("ファイルサイズが異常です.\n");
+	err ("The file size is abnormal.\n");
     }
 
     close (handle);
@@ -356,7 +356,7 @@ main (int argc, char* argv[])
     analyze_args (argc, argv);
     print_title ();
 
-    eprintf ("%s を読み込みます.\n", Filename_in);
+    eprintf ("Loading %s.\n", Filename_in);
 
     /* アドレス関係の大域変数を初期化 */
     Top = (ULONG)loadfile (Filename_in);
@@ -376,8 +376,8 @@ main (int argc, char* argv[])
     Available_text_end = (option_D ? BeginBSS : BeginDATA);
 
     if (Head.bindinfo) {
-	eprintf ("このファイルは bind されています.\n"
-		 "unbind コマンド等で展開してからソースジェネレートして下さい.\n");
+	eprintf ("This file is bound.\n"
+		 "Please unbind and generate source.\n");
 	return 1;
     }
 #endif	/* OSKDIS */
@@ -428,7 +428,7 @@ main (int argc, char* argv[])
 
 
 #ifndef OSKDIS
-    eprintf ("リロケート情報を展開します.\n");
+    eprintf ("Deploy relocate information.\n");
     make_relocate_table ();
 #endif	/* !OSKDIS */
 
@@ -443,29 +443,29 @@ main (int argc, char* argv[])
     check_open_output_file (Filename_out);
 
     if (option_g) {
-	eprintf ("ラベルファイルを読み込み中です.\n");
+	eprintf ("Label file is being loaded.\n");
 	read_labelfile (Labelfilename_in);
     }
     if (option_e)
 	check_open_output_file (Labelfilename_out);
     if (option_T) {
-	eprintf ("テーブル記述ファイルを読み込み中です.\n");
+	eprintf ("Loading table description file.\n");
 	read_tablefile (Tablefilename);
     }
 
 #ifndef OSKDIS
     if (Head.symbol) {
-	eprintf ("シンボルテーブルを展開します.\n");
+	eprintf ("Expand the symbol table.\n");
 	make_symtable ();
     } else
-	eprintf ("シンボルテーブルは残念ながら存在しません.\n");
+	eprintf ("Unfortunately the symbol table does not exist.\n");
 #endif
 
     Exist_symbol = is_exist_symbol ();
 
     analyze_and_generate (argc, argv);
 
-    eprintf ("\n終了しました.\n");
+    eprintf ("\nFinished.\n");
     free_labelbuf ();
     free_relocate_buffer ();
     free_symbuf ();
@@ -473,7 +473,7 @@ main (int argc, char* argv[])
 
     {
 	time_t finish_time = time (NULL);
-	eprintf ("所要時間: %d秒\n", (int) difftime (finish_time, start_time));
+	eprintf ("Time required: %ds\n", (int) difftime (finish_time, start_time));
     }
 
     return 0;
@@ -526,7 +526,7 @@ analyze_and_generate (int argc, char* argv[])
 {
 
     if (option_v) {
-	eprintf ("逆アセンブルリストを出力します.\n");
+	eprintf ("Output disassemble list.\n");
 	disasmlist (Filename_in, Filename_out, Filedate);
 	return;
     }
@@ -549,7 +549,7 @@ analyze_and_generate (int argc, char* argv[])
 	regist_label (Head.base + Head.text + Head.data + Head.bss, DATLABEL | UNKNOWN);
 #endif	/* OSKDIS */
 
-	eprintf ("プログラム領域解析中です.");
+	eprintf ("Program area is being analyzed.");
 
 	/* セクションのエントリアドレスをテーブルに登録 */
 	regist_label (BeginTEXT, DATLABEL | UNKNOWN);
@@ -604,7 +604,7 @@ analyze_and_generate (int argc, char* argv[])
     }
 
     Reason_verbose = (Verbose == 2) ? TRUE : FALSE;
-    eprintf ("\nデータ領域解析中です.");
+    eprintf ("\nData area analysis in progress.");
     analyze_data ();
 
 #if 0
@@ -616,33 +616,33 @@ analyze_and_generate (int argc, char* argv[])
 
     if (!option_p)
 	do
-	    eprintf ("\nデータ領域の中からプログラム領域を捜しています(1).");
+	    eprintf ("\nI am searching the program area from the data area (1).");
 	while (research_data () && !option_l);
 
     if (String_length_min)
 	do {
-	    eprintf ("\n文字列を捜しています.");
+	    eprintf ("\nI am looking for a string.");
 	    if (!search_string (String_length_min) || option_p)
 		break;
-	    eprintf ("\nデータ領域の中からプログラム領域を捜しています(2).");
+	    eprintf ("\nI am searching the program area from the data area (2).");
 	    if (!research_data ())
 		break;
 	    do
-		eprintf ("\nデータ領域の中からプログラム領域を捜しています.");
+		eprintf ("\nI am looking for a program area from the data area.");
 	    while (research_data () && !option_l);
 	} while (!option_l);
 
     if (!option_c) {
-	eprintf ("\nラベルチェック中.");
+	eprintf ("\nLabel is being checked.");
 	search_operand_label ();
     }
 
     if (option_e) {
-	eprintf ("ラベルファイルを作成中です.\n");
+	eprintf ("Label file is being created.\n");
 	make_labelfile (Filename_in, Labelfilename_out);
     }
 
-    eprintf ("ソースを作成中です.");
+    eprintf ("The source is being created.");
     generate (Filename_in, Filename_out, Filedate, argc, argv);
 }
 

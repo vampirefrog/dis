@@ -116,9 +116,10 @@ extern void*
 Realloc (void* ptr, int size)
 {
     void* rc;
+
     
     if ((rc = realloc (ptr, size)) == NULL)
-	err ("ƒq[ƒvƒƒ‚ƒŠ‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·.\n");
+	err ("Heap memory is insufficient.\n");
     return rc;
 }
 

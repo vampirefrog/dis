@@ -140,8 +140,8 @@ search_change_operand (address from, address end)
 		Fixed_count++;
 		not_program (pc0, nlabel);
 		if (option_I)
-		    eprintf ("\n命令の中を差すラベル(%x) -> "
-			     "データ領域に変更しました(%x-%x)\n",
+		    eprintf ("\nLabel to insert in command(%x) -> "
+			     "Changed to data area(%x-%x)\n",
 				nlabel, pc0, nlabel);
 		pc = nlabel;
 		was_prog = FALSE;
@@ -149,7 +149,7 @@ search_change_operand (address from, address end)
 	    else {
 		end = labelshift (previous_pc, pc, end, nadrs);
 		if (option_I)
-		    eprintf ("\n命令の中を差すラベル(%x -> %x+%x)\n",
+		    eprintf ("\nLabel to insert in command(%x -> %x+%x)\n",
 				nlabel, previous_pc, nlabel - previous_pc);
 	    }
 	}
@@ -250,9 +250,9 @@ search_operand_label (void)
     if (Label_on_instruction_count) {
 	if (option_q)
 	    eputc ('\n');
-	eprintf ("命令の中を指すラベル %d 個.\n", Label_on_instruction_count);
+	eprintf ("%d labels pointing in instructions.\n", Label_on_instruction_count);
 	if (Fixed_count)
-	    eprintf ("%d 個の領域をデータ領域に変更しました.\n", Fixed_count);
+	    eprintf ("%d areas have been changed to data area.\n", Fixed_count);
     }
 
     nadrs = next (BeginTEXT);

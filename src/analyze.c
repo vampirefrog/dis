@@ -157,19 +157,19 @@ analyze (address start, analyze_mode mode)
 
     if (Available_text_end <= pc) {
 	if (Reason_verbose)
-	    eprintf ("\n%06x : PC が有効なセクションを外れた\t", pc);
+	    eprintf ("\n%06x : The PC is out of a valid section\t", pc);
 	FALSEret;
     } else if (depend_address (pc) || depend_address (pc - 2)) {
 	if (Reason_verbose)
-	    eprintf ("\n%06x : PC がアドレスに依存している\t", pc);
+	    eprintf ("\n%06x : PC is dependent on address\t", pc);
 	FALSEret;
     } else if ((ULONG)pc & 1) {
 	if (Reason_verbose)
-	    eprintf ("\n%06x : PC が奇数\t", pc);
+	    eprintf ("\n%06x : If PC is odd\t", pc);
 	FALSEret;
     } else if (((ULONG)pc & 1) != 0 || *(LONG*)store == 0) {
 	if (Reason_verbose)
-	    eprintf ("\n%06x : PC が ori.b #0,d0 から始まっている\t", pc);
+	    eprintf ("\n%06x : The PC starts with ori.b #0,d0\t", pc);
 	FALSEret;
     }
 
@@ -212,7 +212,7 @@ analyze (address start, analyze_mode mode)
 	if (neardepend == pc) {				/* アドレス依存チェック */
 	    not_program (start, (address) min((ULONG) pc, (ULONG) limit));
 	    if (Reason_verbose)
-		eprintf ("\n%06x : PC がアドレスに依存している\t", pc);
+		eprintf ("\n%06x : PC is dependent on address\t", pc);
 	    FALSEret;
 	}
 
@@ -220,8 +220,8 @@ analyze (address start, analyze_mode mode)
 	    if (orib >= 2 || *(UWORD*)(store + 2) == 0) {
 		not_program (start, (address) min ((ULONG) pc, (ULONG) limit));
 		if (Reason_verbose)
-		    eprintf ((orib >= 2) ? "\n%06x : ori.b #??,d0 が連続している\t"
-					 : "\n%06x : ori.b #0,d0 を発見\t", pc);
+		    eprintf ((orib >= 2) ? "\n%06x : ori.b #??,d0 are consecutive\t"
+					 : "\n%06x : I found ori.b #0,d0\t", pc);
 		FALSEret;
 	    }
 	    orib++;

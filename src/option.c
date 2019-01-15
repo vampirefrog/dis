@@ -1,6 +1,6 @@
 /* $Id: option.c,v 1.1 1996/11/07 08:03:54 ryo freeze $
  *
- *	ソースコードジェネレータ
+ *	Source Code Generator
  *	Option analyze , etc
  *	Copyright (C) 1989,1990 K.Abe, 1994 R.ShimiZu
  *	All rights reserved.
@@ -143,7 +143,7 @@ analyze_args (int argc, char* argv[])
 	else if (Filename_out == NULL)
 	    Filename_out = argv[fileind++];
 	else
-	    err ("ファイル名が多すぎます.\n");
+	    err ("Too many file names.\n");
     }
     if ((Filename_in  == NULL) || (*Filename_in  == (char)'\0'))
 	usage (1);
@@ -152,10 +152,10 @@ analyze_args (int argc, char* argv[])
 
 
     if ((MMU_type & MMU851) && !(MPU_types & M020))
-	err ("-m68851 は -m68020 としか併用できません.\n");
+	err ("-m68851 can only be used with -m68020.\n");
 
     if ((FPCP_type & F88x) && !(MPU_types & (M020|M030)))
-	err ("-m6888x は -m68020/68030 としか併用できません.\n");
+	err ("-m6888x can only be used with -m68020/68030.\n");
 
     if ((Emulate_mode & 2) && (MPU_types & M060))
 	MPU_types |= MISP;
@@ -216,7 +216,7 @@ ck_atoi (char* str)
 
     while ((c = *ptr++) != '\0') {
 	if ((c < '0') || ('9' < c))
-	    err ("数値の指定が異常です.\n");
+	    err ("Specification of numerical value is abnormal.\n");
     }
 
     return atoi (str);
@@ -351,7 +351,7 @@ option_switch (int opt, char** argv)
 
 			FPCP_type |= (m == 68882) ? F882 : F881;
 			if (id & ~7)
-			    err ("FPU IDの値が異常です(-m).\n");
+			    err ("The value of FPU ID is abnormal (-m).\n");
 			FPUID_table[id*2] = 1;
 			break;
 		    }
@@ -398,7 +398,7 @@ option_switch (int opt, char** argv)
 		    FPUID_table[1*2] = 1;
 		    break;
 		default:
-		    err ("指定の MPU, FPU はサポートしていません(-m).\n");
+		    err ("The specified MPU and FPU are not supported (-m).\n");
 		    /* NOT REACHED */
 		}
 	    } while ((optarg = next) != NULL);
@@ -413,7 +413,7 @@ option_switch (int opt, char** argv)
     case 'o':
 	String_width = ck_atoi (optarg);
 	if( String_width < 1 || 80 < String_width )
-	    err ("値が無効な範囲です(-o).\n");
+	    err ("The value is an invalid range (-o).\n");
 	break;
     case 'p':
 	option_p = TRUE;
@@ -422,7 +422,7 @@ option_switch (int opt, char** argv)
 	option_q = TRUE;
 	if( optarg ) Quiet_mode = ck_atoi (optarg);
 	if( Quiet_mode < 0 || 1 < Quiet_mode )
-	    err ("値が無効な範囲です(-q).\n");
+	    err ("Value is invalid range (-q).\n");
 	break;
     case 'r':
 	option_r = TRUE;
@@ -430,7 +430,7 @@ option_switch (int opt, char** argv)
     case 's':
 	Output_Symbol = optarg ? ck_atoi (optarg) : 0;
 	if ((unsigned short)Output_Symbol > 2)
-	    err ("値が無効な範囲です(-s).\n");
+	    err ("Value is invalid range (-s).\n");
 	break;
     case 'u':
 	Disasm_UnusedTrapUndefined = FALSE;
@@ -443,7 +443,7 @@ option_switch (int opt, char** argv)
     case 'w':
 	Data_width = ck_atoi (optarg);
 	if( Data_width < 1 || 32 < Data_width )
-	    err ("値が無効な範囲です(-w).\n");
+	    err ("Value is invalid range (-w).\n");
 	break;
     case 'x':
 	option_x = TRUE;
@@ -473,7 +473,7 @@ option_switch (int opt, char** argv)
 #endif
 	}
 	if (Base > Exec) {
-	    err ("値が無効な範囲です(-z).\n");
+	    err ("The value is invalid range (-z).\n");
 	}
 	break;
 
@@ -486,7 +486,7 @@ option_switch (int opt, char** argv)
     case 'C':
 	SymbolColonNum = optarg ? ck_atoi (optarg) : 0;
 	if( SymbolColonNum < 0 || 3 < SymbolColonNum )
-	    err ("値が無効な範囲です(-C).\n");
+	    err ("Value is invalid range (-C).\n");
 	break;
     case 'D':
 	option_D = TRUE;
@@ -505,14 +505,14 @@ option_switch (int opt, char** argv)
 	break;
     case 'K':
 	if (!optarg[0] || optarg[1])
-	    err ("コメントキャラクタは一文字しか指定出来ません(-K).\n");
+	    err ("Only one character can be specified for the comment character (-K).\n");
 	CommentChar = *optarg;
 	break;
     case 'L':
 	if (!optarg[0] || optarg[1])
-	    err ("ラベルの先頭文字は一文字しか指定出来ません(-L).\n");
+	    err ("Only the first letter of the label can be specified (-L).\n");
 	if ((char)'0' <= *optarg && *optarg <= (char)'9')
-	    err ("ラベルの先頭文字に数字は使えません(-L).\n");
+	    err ("Numbers can not be used as the first character of the label (-L).\n");
 	Label_first_char = *optarg;
 	break;
     case 'M':
@@ -524,7 +524,7 @@ option_switch (int opt, char** argv)
     case 'P':
 	Emulate_mode = ck_atoi (optarg);
 	if (Emulate_mode & ~0x03)
-	    err ("値が無効な範囲です(-P).\n");
+	    err ("Value is invalid range (-P).\n");
 	break;
     case 'Q':
     /*  option_Q = TRUE;  */
@@ -532,7 +532,7 @@ option_switch (int opt, char** argv)
     case 'R':
 	UndefRegLevel = ck_atoi (optarg);
 	if (UndefRegLevel & ~0x0f)
-	    err ("値が無効な範囲です(-R).\n");
+	    err ("Value is invalid range (-R).\n");
 	break;
     case 'S':
 	option_S = TRUE;
@@ -553,7 +553,7 @@ option_switch (int opt, char** argv)
     case 'V':
 	Verbose = ck_atoi (optarg);
 	if( Verbose < 0 || 2 < Verbose )
-	    err ("値が無効な範囲です(-V).\n");
+	    err ("Value is invalid range (-V).\n");
 	break;
     case 'W':
 	Compress_len = ck_atoi (optarg);
@@ -565,7 +565,7 @@ option_switch (int opt, char** argv)
 	option_Z = TRUE;
 	Zerosupress_mode = optarg ? ck_atoi(optarg) : 0;
 	if( Zerosupress_mode < 0 || 1 < Zerosupress_mode )
-	    err ("値が無効な範囲です(-Z).\n");
+	    err ("Value is invalid range (-Z).\n");
 	break;
     case '#':
 	Debug = ck_atoi (optarg);
@@ -623,99 +623,99 @@ extern void
 usage (int exitcode)
 {
     static const char message[] =
-	"usage: dis [option] 実行ファイル名 [出力ファイル名]\n"
+	"usage: dis [option] Execution file name [Output file name]\n"
 	"option:\n"
 
-	/* 小文字オプション */
-	"	-a[num]		num 行ごとにアドレスをコメントで入れる(num を省略すると 5 行ごと)\n"
-	"	-b num		相対分岐命令のサイズの出力(0:自動 1:常に省略 2:常に付ける)\n"
-	"	-c		ラベルチェックを行わない\n"
-	"	-d		デバイスドライバの時に指定\n"
-	"	-e[file]	ラベルファイルの出力\n"
-	"	-f		バイト操作命令の不定バイトのチェック($00 or $ff ?)をしない\n"
-	"	-g[file]	ラベルファイルを読み込む\n"
-	"	-h		データ領域中の $4e75(rts)の次のアドレスに注目する\n"
-	"	-i		分岐先で未定義命令があってもデータ領域と見なさない\n"
-	"	-j		アドレスエラーが起こるであろう命令を未定義命令と見なさない\n"
-	"	-k		命令の中を指すラベルはないものと見なす\n"
-	"	-l		プログラム領域が見つからなくなるまで何度も捜すことをしない\n"
-	"	-m 680x0[,...]	逆アセンブル対象の MPU を指定(68000-68060,680x0)\n"
-	"	-m 68851	68851 命令を有効にする(-m68020 指定時のみ有効)\n"
-	"	-m 6888x[,ID]	有効な FPCP とその ID を指定(68881/68882 ID=0-7,省略時1)\n"
-	"	-n num		文字列として判定する最小の長さ. 0 なら判定しない(初期値=3)\n"
-	"	-o num		文字列領域の桁数(1≦num≦80 初期値=60)\n"
-	"	-p		データ領域中のプログラム領域を判別しない\n"
-	"	-q[num]		メッセージを出力しない([0]:通常 1:テーブルに関する情報も出力しない)\n"
-	"	-r		文字列に 16 進数のコメントを付ける\n"
-	"	-s[num]		シンボルテーブルの出力([0]:しない 1:[通常] 2:全て)\n"
+	/* Lower case option */
+	"	-a[num]		num Comment out addresses for each line (every 5 lines if num is omitted)\n"
+	"	-b num		Relative branch instruction size output (0: Auto 1: Always omitted 2: Always attached)\n"
+	"	-c		Do not perform label check\n"
+	"	-d		Specified at the time of device driver\n"
+	"	-e[file]	Output of label file\n"
+	"	-f		Do not check the indefinite byte of byte manipulation instruction ($ 00 or $ff ?)\n"
+	"	-g[file]	Read label file\n"
+	"	-h		Pay attention to the address following $4e75(rts) in the data area\n"
+	"	-i		Even if there is an undefined instruction at the branch destination, it is not regarded as a data area\n"
+	"	-j		Do not regard instructions that address errors will occur as undefined instructions\n"
+	"	-k		We assume that there is no label pointing in the instruction\n"
+	"	-l		I will not search severely until I can not find the program area\n"
+	"	-m 680x0[,...]	Specify MPU to be disassembled (68000-68060, 680x0)\n"
+	"	-m 68851	68851 Enable instruction (valid only when -m68020 is specified)\n"
+	"	-m 6888x[,ID]	Specify valid FPCP and its ID (68881/68882 ID=0-7, default 1)\n"
+	"	-n num		Minimum length to evaluate as a string. If not 0(Initial value = 3)\n"
+	"	-o num		Number of digits in character string area (1 ≦ num ≦ 80 initial value = 60)\n"
+	"	-p		The program area in the data area is not discriminated\n"
+	"	-q[num]		Do not output message ([0]: normal 1: information about table is not output)\n"
+	"	-r		Add a hexadecimal comment to a character string\n"
+	"	-s[num]		Output of symbol table ([0]:not 1:[normal] 2:all)\n"
 /* -t */
-	"	-u[num]		未使用の A,F line trap を未定義命令と見なさない(num=1 SX-Window対応)\n"
-	"	-v		単なる逆アセンブルリストの出力\n"
-	"	-w num		データ領域の横バイト数(1≦num≦32 初期値=8)\n"
-	"	-x		実際のオペコードを 16 進数のコメントで付ける\n"
-	"	-y		全てのデータ領域をプログラム領域でないか確かめることをしない\n"
-	"	-z base,exec	実行ファイルを base からのバイナリファイルとみなし、exec から解析する\n"
+	"	-u[num]		Unused A, F line trap is not regarded as an undefined instruction (num = 1 SX-Window compatible)\n"
+	"	-v		Output a simple disassemble list\n"
+	"	-w num		Number of horizontal bytes in the data area (1 ≦ num ≦ 32 initial value = 8)\n"
+	"	-x		Append the actual opcode with a hexadecimal comment\n"
+	"	-y		Do not check whether all data areas are program areas\n"
+	"	-z base,exec	We consider the executable file as a binary file from base and parse it from exec\n"
 
-	/* 大文字オプション */
+	/* Uppercase option */
 	"\n"
-	"	-A		cmpi, movea 等を cmp, move 等にする\n"
-	"	-B		bra の後でも改行する\n"
-	"	-C[num]		ラベルの後のコロン(0:付けない 1:全てに1つ [2]:通常 3:全てに2つ)\n"
-	"	-D		データセクション中にもプログラムを認める\n"
-	"	-E		バイト操作命令の不定バイトの書き換えチェックをしない\n"
-	"	-F		dbra,fdbra を dbf,fdbf として出力する\n"
-	"	-G		サブルーチンコールの直後に引数を置くプログラムを解析する\n"
+	"	-A		Change cmpi, movea etc. to cmp, move etc.\n"
+	"	-B		Breaking a line even after bra\n"
+	"	-C[num]		Colon after the label (0: not attached 1: 1 for every [2]: normal 3:2 for all)\n"
+	"	-D		You can also accept programs in the data section\n"
+	"	-E		Do not check rewriting of indefinite bytes of byte manipulation instruction\n"
+	"	-F		Output dbra, fdbra as dbf, fdbf\n"
+	"	-G		Analyze the program that puts the argument immediately after the subroutine call\n"
 /* -H */
-	"	-I		命令の中を差すラベルのアドレスを表示する\n"
+	"	-I		Displays the address of the label to be inserted in the command\n"
 /* -J */
-	"	-K char		char をコメントキャラクタとして用いる\n"
-	"	-L char		char をラベル名の先頭文字として用いる\n"
-	"	-M		cmpi, move, addi.b, subi.b #imm および pack, unpk にコメントをつける\n"
-	"	-N		サイズがデフォルトなら付けない\n"
+	"	-K char		Use char as a comment character\n"
+	"	-L char		Use char as the first character of label name\n"
+	"	-M		cmpi, move, addi.b, subi.b Add comments to #imm and pack, unpk\n"
+	"	-N		If size is default, it does not\n"
 /* -O */
-	"	-P num		ソフトウェアエミュレーション命令を有効にする(ビット指定, 初期値=3)\n"
-	"		+1	未実装浮動小数点命令を有効にする\n"
-	"		+2	未実装整数命令を有効にする\n"
-/*	"	-Q		環境変数 dis_opt を参照しない\n"	*/
-	"	-R num		未使用フィールドのチェック項目の指定(ビット指定, 初期値=15)\n"
-	"		+1	mulu.l, muls.l, ftst.x における未使用レジスタフィールドのチェック\n"
-	"		+2	拡張アドレッシングでのサプレスされたレジスタフィールドのチェック\n"
-	"		+4	サプレスされたインデックスレジスタに対するスケーリングのチェック\n"
-	"		+8	サプレスされたインデックスレジスタに対するサイズ指定(.l)のチェック\n"
-	"	-S[num]		出力ファイルを num KB ごとに分割する(num を省略すると 64KB)\n"
-	"	-T[file]	テーブル記述ファイルを読み込む\n"
-	"	-U		ニーモニックを大文字で出力する\n"
-	"	-V num		バックトラックの原因の表示(0:しない [1]:プログラム領域 2:全ての領域)\n"
-	"	-W num		同一データを .dcb で出力する最小バイト数. 0なら圧縮しない(初期値=64)\n"
-	"	-X		16 進数を大文字で出力する\n"
-	"	-Y		カレントディレクトリからも include ファイルを検索する\n"
-	"	-Z[num]		16 進数をゼロサプレスする([0]:通常 1:省略可能な'$'を省略)\n"
+	"	-P num		Enable software emulation instruction (bit specification, initial value = 3)\n"
+	"		+1	Enable unimplemented floating point instructions\n"
+	"		+2	Enable unimplemented integer instructions\n"
+/*	"	-Q		Do not reference environment variable dis_opt\n"	*/
+	"	-R num		Specification of check item of unused field (bit designation, initial value = 15)\n"
+	"		+1	Check unused register fields in mulu.l, muls.l, ftst.x\n"
+	"		+2	Check for suppressed register fields in extended addressing\n"
+	"		+4	Check scaling against suppressed index register\n"
+	"		+8	Check size specification (.l) for suppressed index register\n"
+	"	-S[num]		Divide the output file every num KB (if num is omitted, 64 KB)\n"
+	"	-T[file]	Read table description file\n"
+	"	-U		Output mnemonic in capital letters\n"
+	"	-V num		Display of cause of backtrack (0:Disable [1]:Program area 2:all areas)\n"
+	"	-W num		The minimum number of bytes to output the same data in. Dcb. If 0, it is not compressed (initial value = 64)\n"
+	"	-X		Output hexadecimal numbers in upper case\n"
+	"	-Y		Search the include file from the current directory\n"
+	"	-Z[num]		Zero suppression of hexadecimal number ([0]:normal 1:omitted optional '$' omitted)\n"
 
-	/* 単語名オプション */
+	/* Word name option */
 	"\n"
 
 #ifndef	OSKDIS
-	"	--include-XXX-mac=file	include ファイルの指定(XXX = doscall,iocscall,fefunc)\n"
-	"	--exclude-XXX-mac	include ファイルを読み込まない\n"
+	"	--include-XXX-mac=file	Specifying the include file (XXX = doscall, iocscall, fefunc)\n"
+	"	--exclude-XXX-mac	Do not read include files\n"
 #endif
-	"	--header=file	ヘッダファイルの指定(環境変数 dis_header より優先)\n"
-	"	--(no-)fpsp	未実装浮動小数点命令を[有効](無効)にする\n"
-	"	--(no-)isp	未実装整数命令を[有効](無効)にする\n" 
-	"	--no-fpu	内蔵 FPU 命令を無効にする(-m68040～68060 の後に指定)\n" 
-	"	--no-mmu	内蔵 MMU 命令を無効にする(-m68030～68060 の後に指定)\n" 
-	"	--sp		a7 レジスタを'sp'と表記する(標準では --a7)\n"
-	"	--old-syntax	アドレッシングを旧表記で出力する(標準では --new-syntax)\n"
-	"	--(in)real	浮動小数点を[実数表記](内部表現)で出力する\n"
-	"	--overwrite	ファイルを無条件で上書きする\n"
-	"	--version	バージョンを表示する\n"
-	"	--help		使用法を表示する\n"
+	"	--header=file	Specification of header file (Overrides environment variable dis_header)\n"
+	"	--(no-)fpsp	Make the unimplemented floating point instruction [Enable] (invalid)\n"
+	"	--(no-)isp	Make unimplemented integer instruction [Enable] (invalid)\n"
+	"	--no-fpu	Invalidate the internal FPU instruction (specified after -m 68040 to 68060)\n"
+	"	--no-mmu	Invalidate the built-in MMU instruction (specified after -m 68030 to 68060)\n"
+	"	--sp		Write a7 register as 'sp' (- a7 by default)\n"
+	"	--old-syntax	Output addressing as old notation (--new-syntax by default)\n"
+	"	--(in)real	Output floating point in [real notation] (internal expression)\n"
+	"	--overwrite	Overwrite file unconditionally\n"
+	"	--version	Display version\n"
+	"	--help		Display usage\n"
 
-#if 0	/* 隠しオプション */
+#if 0	/* Hidden option */
 	"\n"
 #ifndef	OSKDIS
-	"	--x|r|z		実行ファイルを X|R|Z 形式と見なす\n"
+	"	--x|r|z		Consider an executable file as X | R | Z format\n"
 #endif
-	"	-# num		デバッグモード\n"
+	"	-# num		Debug mode\n"
 #endif
 	; /* end of message */
 
