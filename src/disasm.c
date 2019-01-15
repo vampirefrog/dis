@@ -292,8 +292,14 @@ dis (address ptr, disasm* code, address* pcptr)
     code->op1.eaadrs2 = code->op2.eaadrs2 = code->op3.eaadrs2 = code->op4.eaadrs2 =
 	(address) -1;
 
-    code->op1.exbd = code->op2.exbd = code->op3.exod = code->op4.exod =
-    code->op1.exod = code->op2.exod = code->op3.exod = code->op4.exod = -1;
+    code->op1.exbd = -1;
+    code->op2.exbd = -1;
+    code->op3.exod = -1;
+    code->op4.exod = -1;
+    code->op1.exod = -1;
+    code->op2.exod = -1;
+    code->op3.exod = -1;
+    code->op4.exod = -1;
 
     code->op1.labelchange1 = code->op2.labelchange1 =
     code->op3.labelchange1 = code->op4.labelchange1 =
@@ -1122,7 +1128,7 @@ op04 (address ptr, disasm* code)
 		itod2 (code->op1.operand + 1, WORD1 & 15);
 	    }
 	    code->op1.ea = IMMED;
-	    code->op1.opval = (address) (WORD1 & 15);
+	    code->op1.opval = (address) ((UINTPTR)WORD1 & 15);
 	    return;
 #endif	/* OSKDIS */
 	}
@@ -1293,7 +1299,7 @@ op04 (address ptr, disasm* code)
 	    code->op1.operand[2] = '\0';
 	}
 	code->op1.ea = IMMED;
-	code->op1.opval = (address) (WORD1 & 7);
+	code->op1.opval = (address) ((UINTPTR)WORD1 & 7);
 	return;
     case 0x808:
 	REJECT (M000|M010);
@@ -2610,7 +2616,7 @@ op0f (address ptr, disasm* code)
 			itox2d (code->op1.operand + 1, WORD2 & 0x7f);
 		    }
 		    code->op1.ea = IMMED;
-		    code->op1.opval = (address) (WORD2 & 0x7f);
+		    code->op1.opval = (address) ((UINTPTR)WORD2 & 0x7f);
 		    setFPn (&code->op2, WORD2 >> 7);
 		    return;
 		} else {				/* Memory to FPn */
@@ -3535,9 +3541,9 @@ setEA (disasm* code, operand* op, address ptr, int mode)
 
 		zareg = (temp & 0x80);
 		if (bdsize)
-		    op->opval = zareg ? (address) bd : PC + bd + code->bytes;
+		    op->opval = zareg ? (address)(UINTPTR)bd : PC + bd + code->bytes;
 		if (odsize == 4)
-		    op->opval2 = (address) od;
+		    op->opval2 = (address) (UINTPTR)od;
 		op->exbd = bdsize;
 		op->exod = odsize;
 
@@ -3691,14 +3697,14 @@ setEA (disasm* code, operand* op, address ptr, int mode)
 			IfNeedStr {
 			    temp = (LONG)op->opval;
 			    *p++ = '#';
-			    if (undefbyte == 0xff && (signed char)(int) op->opval < 0) {
+			    if (undefbyte == 0xff && (signed char)(UINTPTR) op->opval < 0) {
 				*p++ = '-';
 				temp = -(UBYTE)temp & 0xff;
 			    }
 			    itox2d (p, temp);
-		        }
+			}
 			if (Disasm_Exact && undefbyte
-			 && (undefbyte != 0xff || (signed char)(int) op->opval >= 0)) {
+			 && (undefbyte != 0xff || (signed char)(UINTPTR) op->opval >= 0)) {
 			    UNDEFINED(); return;
 			}
 			code->bytes += 2;
@@ -3931,9 +3937,9 @@ setEA (disasm* code, operand* op, address ptr, int mode)
 		}
 
 		if (bdsize == 4)
-		    op->opval  = (address) bd;
+		    op->opval  = (address)(UINTPTR) bd;
 		if (odsize == 4)
-		    op->opval2 = (address) od;
+		    op->opval2 = (address)(UINTPTR) od;
 		op->exbd = bdsize;
 		op->exod = odsize;
 

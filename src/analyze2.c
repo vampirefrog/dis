@@ -118,10 +118,10 @@ analyze_data (void)
 
 	/* rts ‚ÌŸ‚ÌƒAƒhƒŒƒX‚ğ“o˜^‚·‚é */
 	if (option_h && data_from < Available_text_end) {
-	    for (adrs = data_from + ((int)data_from & 1); adrs < data_to; adrs += 2) {
+	    for (adrs = data_from + ((UINTPTR)data_from & 1); adrs < data_to; adrs += 2) {
 		if (peekw (adrs + Ofst) == 0x4e75) {
 #ifdef	DEBUG
-		    printf ("found 0x4e75 in %x\n", (int) adrs);
+		    printf ("found 0x4e75 in %"PRI_UINTPTR"\n", (UINTPTR) adrs);
 #endif
 		    regist_label (adrs + 2, DATLABEL | UNKNOWN);
 		}

@@ -99,7 +99,7 @@ interpret (table* table_ptr)
 
 #define BSS_CHECK(idstr) ({ if (in_bss) goto bss_error; })
 #define ODD_CHECK(size) ({ \
-	if ((int)Eval_PC & 1) \
+	if ((UINTPTR)Eval_PC & 1) \
 	    eprintf ("Warning: 奇数アドレス(%x)で%s指定されています.\n", Eval_PC, size); \
 	})
 

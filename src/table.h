@@ -21,7 +21,7 @@
 #if defined (__mc68020__) || defined (__i386__)
 #define PEEK_LONG(p) ((ULONG)(BeginBSS <= (p) ? 0 : peekl ((p) + Ofst)))
 #else
-#define PEEK_LONG(p) ((ULONG)(BeginBSS <= (p) ? 0 : ((int)(p) & 1) ? \
+#define PEEK_LONG(p) ((ULONG)(BeginBSS <= (p) ? 0 : ((UINTPTR)(p) & 1) ? \
 		(peekl ((p) + Ofst - 1) << 8) + ((p) + Ofst)[3] : peekl ((p) + Ofst)))
 #endif
 

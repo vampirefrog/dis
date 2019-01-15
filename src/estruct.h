@@ -22,6 +22,8 @@ typedef unsigned short	UWORD;
 typedef long		LONG;
 typedef unsigned long	ULONG;
 
+typedef unsigned long UINTPTR;
+#define PRI_UINTPTR "lx"
 
 #ifdef	TRUE
 #undef	TRUE
@@ -84,6 +86,21 @@ typedef struct {	/* .x ファイルのヘッダ */
     ULONG   bindinfo;
 } __attribute__ ((packed)) xheader;
 
+typedef struct {    /* .x ファイルのヘッダ */
+    unsigned short   head;
+    char    reserve2;
+    char    mode;
+    unsigned int  base;
+    unsigned int  exec;
+    unsigned int   text;
+    unsigned int   data;
+    unsigned int   bss;
+    unsigned int   offset;
+    unsigned int   symbol;
+    char    reserve[ 0x1c ];
+    unsigned int   bindinfo;
+} __attribute__ ((packed)) xfileheader;
+
 typedef struct {	/* .z ファイルのヘッダ */
     UWORD   header;
     ULONG   text;
@@ -93,7 +110,6 @@ typedef struct {	/* .z ファイルのヘッダ */
     address base;
     UWORD   pudding;
 } __attribute__ ((packed)) zheader;
-
 
 #ifdef	OSKDIS
 typedef struct {	/* OS-9/680x0 モジュールのヘッダ    */

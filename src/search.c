@@ -76,7 +76,7 @@ is_string (address from, address end, address* newend, int str_min)
 
 	    case 0x00:	/* NUL */
 		/* 10 ‰­‚ª .dc.b ';šÊ',0 ‚É‚È‚ç‚È‚¢‚æ‚¤‚É‚·‚é */
-		if (((int) store & 1) == 0
+		if (((UINTPTR) store & 1) == 0
 		 && peekl (store - sizeof (ULONG)) == 1000000000L
 		 && (store - sizeof (ULONG) - Ofst) == from)
 		    return FALSE;

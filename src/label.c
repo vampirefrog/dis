@@ -22,7 +22,7 @@
 #include "./avl/avl.h"
 
 #define	AVL_COMPARE(label1, label2) \
-    (signed)((unsigned)(label1)->label - (unsigned)(label2)->label)
+    (signed)((UINTPTR)(label1)->label - (UINTPTR)(label2)->label)
 
 #include "./avl/avl.c"
 
@@ -43,7 +43,7 @@ compare (lblbuf* label1, lblbuf* label2)
 private void
 print (lblbuf* label)
 {
-    printf ("%x", (unsigned int)label->label);
+    printf ("%"PRI_UINTPTR, (UINTPTR)label->label);
 }
 
 
@@ -105,7 +105,7 @@ regist_label (address adrs, lblmode mode)
     }
 
     if (Debug & BLABEL)
-	printf ("Regist 0x%.6x as %#x\n", (unsigned int) adrs, mode);
+	printf ("Regist 0x%.6"PRI_UINTPTR" as %#x\n", (UINTPTR) adrs, mode);
 
     if ((lptr = search_label (adrs)) != NULL) {
 	lptr->count++;
@@ -131,8 +131,8 @@ regist_label (address adrs, lblmode mode)
 	if (mode & FORCE) {
 	    lptr->mode = (lptr->mode & (TABLE | ENDTABLE | SYMLABEL)) | mode;
 	    if (Debug & BLABEL)
-		printf ("regist : %x(%d) was forced to %x\n",
-				(unsigned int) adrs, lptr->count, lptr->mode);
+		printf ("regist : %"PRI_UINTPTR"(%d) was forced to %x\n",
+				(UINTPTR) adrs, lptr->count, lptr->mode);
 	    return TRUE;
 	}
 
@@ -142,8 +142,8 @@ regist_label (address adrs, lblmode mode)
 	    if (isDATLABEL (lptr->mode)) {
 		lptr->mode = (lptr->mode & (ENDTABLE | SYMLABEL)) | PROLABEL;
 		if (Debug & BLABEL)
-		    printf ("regist : %x(%d) was prog. %x\n",
-				(unsigned int) adrs, lptr->count, lptr->mode);
+		    printf ("regist : %"PRI_UINTPTR"(%d) was prog. %x\n",
+				(UINTPTR) adrs, lptr->count, lptr->mode);
 	    }
 	    return TRUE;
 	}
@@ -201,11 +201,11 @@ unregist_label (address adrs)
     avl_node* del;
 
     if (Debug & BLABEL)
-	printf ("* unregist_label %x\n", (unsigned int) adrs);
+	printf ("* unregist_label %"PRI_UINTPTR"\n", (UINTPTR) adrs);
 
     if ((del = search_label2 (adrs)) == NULL) {
 	if (Debug & BLABEL)
-	    printf ("unregist_label : %x was not registed\n", (unsigned int) adrs);
+	    printf ("unregist_label : %"PRI_UINTPTR" was not registed\n", (UINTPTR) adrs);
     }
     else {
 	lblbuf* ptr = (lblbuf*) AVL_get_data (del);

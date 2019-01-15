@@ -285,24 +285,37 @@ os9head_error:
 	Head.symbol = 0;
 	Head.bindinfo = 0;
 	Absolute = ABSOLUTE_ZFILE;
-    } else {		/* if (FileType == (char)'x') */
-	if (read (handle, (char *)&Head, sizeof (Head)) != sizeof (Head)) {
+    } else {            /* if (FileType == (char)'x') */
+	xfileheader fh;
+	if (read (handle, (char *)&fh, sizeof (fh)) != sizeof (fh)) {
 filetype_error:
 	    close (handle);
 	    err ("このようなファイルは取り扱っておりません.\n");
 	}
+	Head.head = fh.head;
+	Head.reserve2 = fh.reserve2;
+	Head.mode = fh.mode;
+	Head.text = fh.text;
+	Head.data = fh.data;
+	Head.bss = fh.bss;
+	Head.offset = fh.offset;
+	Head.symbol = fh.symbol;
+	Head.bindinfo = fh.bindinfo;
 
 #ifndef __BIG_ENDIAN__
 	/* big-endian で格納されているヘッダを little-endian に変更する */
-	Head.base = (address) peekl (&Head.base);
-	Head.exec = (address) peekl (&Head.exec);
 	Head.text = peekl (&Head.text);
 	Head.data = peekl (&Head.data);
 	Head.bss  = peekl (&Head.bss);
 	Head.offset = peekl (&Head.offset);
 	Head.symbol = peekl (&Head.symbol);
-#endif
 
+	Head.base = (address) peekl (&fh.base);
+	Head.exec = (address) peekl (&fh.exec);
+#else
+	Head.base = (address)fh.base;
+	Head.exec = (address)fh.exec;
+#endif
     }
 #endif	/* OSKDIS */
 

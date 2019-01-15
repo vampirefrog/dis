@@ -490,7 +490,7 @@ storeexp (address v, int mode)
 	exp->registed = TRUE;
 	if (ParseMode == PARSE_ANALYZING
 	 && !regist_label (v, DATLABEL | UNKNOWN))
-	    printf ("??? address %x\n", (unsigned int) v);
+	    printf ("??? address %"PRI_UINTPTR"\n", (UINTPTR) v);
     } else
 	exp->registed = FALSE;
 
@@ -528,7 +528,7 @@ itoxd_by_size (char* buf, ULONG n, opesize size)
 static void
 peek_warning (address adrs, int size)
 {
-    if ((int)adrs & 1)
+    if ((UINTPTR)adrs & 1)
 	eprintf ("Warning: peek.%c ‚Ìˆø”‚ªŠï”ƒAƒhƒŒƒX(%x)‚Å‚·\n", size, adrs);
 }
 

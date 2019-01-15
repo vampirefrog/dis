@@ -78,7 +78,7 @@ output_symbol_table (const char* op_equ, const char* op_xdef, const char* colon)
     int out_xdef = (Output_Symbol == 2);
     int count = 0;
 
-    if ((int)ptr & 1 || !Output_Symbol)
+    if ((UINTPTR)ptr & 1 || !Output_Symbol)
 	return count;
 
     while ((ULONG)ptr <= end) {
@@ -123,7 +123,7 @@ output_symbol_table (const char* op_equ, const char* op_xdef, const char* colon)
 	/* 今処理したシンボルを飛ばす */
 	while (*ptr++)
 	    ;
-	ptr += (int)ptr & 1;
+	ptr += (UINTPTR)ptr & 1;
     }
 
     return count;
@@ -163,7 +163,7 @@ make_symtable (void)
     ULONG end = (ULONG)ptr + Head.symbol
 	      - (sizeof (UWORD) + sizeof (address) + 2);
 
-    if ((int)ptr & 1)
+    if ((UINTPTR)ptr & 1)
 	return;
 
     while ((ULONG)ptr <= end) {
@@ -226,7 +226,7 @@ make_symtable (void)
 	/* 今処理したシンボルを飛ばす */
 	while (*ptr++)
 	    ;
-	ptr += (int)ptr & 1;
+	ptr += (UINTPTR)ptr & 1;
     }
 }
 

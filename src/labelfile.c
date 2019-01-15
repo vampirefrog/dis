@@ -64,7 +64,7 @@ make_labelfile (char* xfilename, char* labelfilename)
     while (nadrs->label != (address)-1) {
 	int mode = (nadrs->mode & 0xff);
 
-	fprintf (fp, "%06x\t", (unsigned int)nadrs->label);
+	fprintf (fp, "%06" PRI_UINTPTR "\t", (UINTPTR)nadrs->label);
 
 	if (isPROLABEL (nadrs->mode))
 	    fputc ('P', fp);
@@ -144,7 +144,7 @@ get_line (char* linebuf, int line, int pass, address* adrs, char** symptrptr)
     opesize attr;
 
     if (Debug & BDEBUG)
-	printf ("%x, %c\n", (unsigned int) ad, *ptr);
+	printf ("%" PRI_UINTPTR ", %c\n", (UINTPTR) ad, *ptr);
 
     if ((pass == 0 && islower (*ptr)) ||
 	(pass == 1 && isupper (*ptr)))
@@ -221,7 +221,7 @@ work (address adrs, int attr, int pass, int line)
     else {
 	if (isPROLABEL (attr)) {
 	    if (Debug & BDEBUG)
-		printf ("work:prog %x\n", (unsigned int) adrs);
+		printf ("work:prog %"PRI_UINTPTR"\n", (UINTPTR) adrs);
 	    if (!analyze (adrs, ANALYZE_IGNOREFAULT))
 		eprintf ("\nAddress %x(labelfile Line %d)Ç©ÇÁÇÕÉvÉçÉOÉâÉÄÇ∆å©Ç»ÇπÇ‹ÇπÇÒ.",
 				adrs, line);

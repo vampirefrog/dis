@@ -895,7 +895,7 @@ private void
 dataout (address pc, ULONG byte, opesize size)
 {
     address store = pc + Ofst;
-    int odd_flag = (int)store & 1;
+    int odd_flag = (UINTPTR)store & 1;
 
     DEBUG_PRINT (("dataout : store %x byte %x size %x\n", store, byte, size));
     charout ('#');
@@ -1739,7 +1739,7 @@ tablegen_sub (formula* exprptr, address tabletop, address pc, int notlast)
 	case EVENID:
 	    output_opecode (PSEUDO EVEN);
 	    newline (Eval_PC);
-	    if ((int)Eval_PC & 1)
+	    if ((UINTPTR)Eval_PC & 1)
 		Eval_PC++;	/* pc_inc_inst = TRUE; */
 	    else
 		pc_inc_inst = FALSE;
@@ -1774,7 +1774,7 @@ tablegen_sub (formula* exprptr, address tabletop, address pc, int notlast)
 		    /* if .even here.... */
 		    output_opecode (PSEUDO EVEN);
 		    newline (Eval_PC);
-		    Eval_PC += (int)Eval_PC & 1;
+		    Eval_PC += (UINTPTR)Eval_PC & 1;
 		}
 		end_by_break = TRUE;
 		goto tableend;
