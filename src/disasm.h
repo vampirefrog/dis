@@ -47,84 +47,84 @@ typedef unsigned char mputypes;
 
 
 typedef enum {
-    OTHER ,		/* 普通の命令 */
-    JMPOP ,		/* 分岐命令 */
-    JSROP ,		/* サブルーチンコール命令 */
-    RTSOP ,		/* リターン命令 */
-    BCCOP ,		/* 条件分岐命令 */
-    UNDEF = 15 ,	/* 未定義 */
+	OTHER ,		/* 普通の命令 */
+	JMPOP ,		/* 分岐命令 */
+	JSROP ,		/* サブルーチンコール命令 */
+	RTSOP ,		/* リターン命令 */
+	BCCOP ,		/* 条件分岐命令 */
+	UNDEF = 15 ,	/* 未定義 */
 } opetype;
 
 
 typedef enum {
-    DregD ,		/* データレジスタ直接 */
-    AregD ,		/* アドレスレジスタ直接 */
-    AregID ,		/* アドレスレジスタ間接 */
-    AregIDPI ,		/* ポストインクリメントアドレスレジスタ間接 */
-    AregIDPD ,		/* プリデクリメントアドレスレジスタ間接 */
-    AregDISP ,		/* ディスプレースメント付アドレスレジスタ間接 */
-    AregIDX ,		/* インデックス付アドレスレジスタ間接 */
-    AbShort = 8 ,	/* 絶対ショートアドレス */
-    AbLong ,		/* 絶対ロングアドレス */
-    PCDISP ,		/* ディスプレースメント付プログラムカウンタ相対 */
-    PCIDX ,		/* インデックス付プログラムカウンタ相対 */
-    IMMED ,		/* イミディエイトデータ */
-    SRCCR = 16 ,	/* CCR / SR 形式 */
+	DregD ,		/* データレジスタ直接 */
+	AregD ,		/* アドレスレジスタ直接 */
+	AregID ,		/* アドレスレジスタ間接 */
+	AregIDPI ,		/* ポストインクリメントアドレスレジスタ間接 */
+	AregIDPD ,		/* プリデクリメントアドレスレジスタ間接 */
+	AregDISP ,		/* ディスプレースメント付アドレスレジスタ間接 */
+	AregIDX ,		/* インデックス付アドレスレジスタ間接 */
+	AbShort = 8 ,	/* 絶対ショートアドレス */
+	AbLong ,		/* 絶対ロングアドレス */
+	PCDISP ,		/* ディスプレースメント付プログラムカウンタ相対 */
+	PCIDX ,		/* インデックス付プログラムカウンタ相対 */
+	IMMED ,		/* イミディエイトデータ */
+	SRCCR = 16 ,	/* CCR / SR 形式 */
 
-    AregIDXB,		/* インデックス&ベースディスプレースメント付きアドレスレジスタ間接 */
-    AregPOSTIDX,	/* ポストインデックス付きメモリ間接 */
-    AregPREIDX,		/* プリインデックス付きメモリ間接 */
-    PCIDXB,		/* インデックス&ベースディスプレースメント付きプログラムカウンタ間接 */
-    PCPOSTIDX,		/* ポストインデックス付きPCメモリ間接 */
-    PCPREIDX,		/* プリインデックス付きPCメモリ間接 */
+	AregIDXB,		/* インデックス&ベースディスプレースメント付きアドレスレジスタ間接 */
+	AregPOSTIDX,	/* ポストインデックス付きメモリ間接 */
+	AregPREIDX,		/* プリインデックス付きメモリ間接 */
+	PCIDXB,		/* インデックス&ベースディスプレースメント付きプログラムカウンタ間接 */
+	PCPOSTIDX,		/* ポストインデックス付きPCメモリ間接 */
+	PCPREIDX,		/* プリインデックス付きPCメモリ間接 */
 
-    CtrlReg,		/* 制御レジスタ */
+	CtrlReg,		/* 制御レジスタ */
 
-    RegPairD,		/* レジスタペア(直接) dx:dy */
-    RegPairID,		/* レジスタペア(間接) (rx):(ry) */
-    BitField,		/* ビットフィールドの {offset:width} */
+	RegPairD,		/* レジスタペア(直接) dx:dy */
+	RegPairID,		/* レジスタペア(間接) (rx):(ry) */
+	BitField,		/* ビットフィールドの {offset:width} */
 
-    MMUreg,		/* MMUレジスタ */
+	MMUreg,		/* MMUレジスタ */
 
-    FPregD,		/* FPn */
-    FPCRSR,		/* FPSR,FPCR,FPIAR */
-    FPPairD,		/* レジスタペア(直接) FPx:FPy */
-    KFactor,		/* K-Factor {offset:width} */
+	FPregD,		/* FPn */
+	FPCRSR,		/* FPSR,FPCR,FPIAR */
+	FPPairD,		/* レジスタペア(直接) FPx:FPy */
+	KFactor,		/* K-Factor {offset:width} */
 
 } adrmode;
 
 
 typedef struct {
-    char	    operand[ 64 ];	/* オペランド文字列 */
-    adrmode	    ea;			/* 実効アドレスモード */
-    address	    opval;		/* オペランドの値 */
-    address	    opval2;		/* オペランドの値(od用) */
-    address	    eaadrs;		/* オペランドの存在アドレス */
-    address	    eaadrs2;		/* オペランドの存在アドレス(od用) */
-    unsigned char   labelchange1;	/* ラベル化可能 -1なら()なし(bsr用) */
-    unsigned char   labelchange2;	/* ラベル化可能 */
-    unsigned char   exbd;		/* bd のサイズ(0,2,4)  0ならサプレス */
-    unsigned char   exod;		/* od のサイズ(0,2,4)  0ならサプレス */
+	char	    operand[ 64 ];	/* オペランド文字列 */
+	adrmode	    ea;			/* 実効アドレスモード */
+	address	    opval;		/* オペランドの値 */
+	address	    opval2;		/* オペランドの値(od用) */
+	address	    eaadrs;		/* オペランドの存在アドレス */
+	address	    eaadrs2;		/* オペランドの存在アドレス(od用) */
+	unsigned char   labelchange1;	/* ラベル化可能 -1なら()なし(bsr用) */
+	unsigned char   labelchange2;	/* ラベル化可能 */
+	unsigned char   exbd;		/* bd のサイズ(0,2,4)  0ならサプレス */
+	unsigned char   exod;		/* od のサイズ(0,2,4)  0ならサプレス */
 } operand;
 
 
 typedef struct {
-    char    opecode[ 32 ];  /* 命令 */
-    opesize size;	    /* サイズ ( lea , pea は long ) ( 0 = .b .w .l .s nothing ) */
-    opesize size2;	    /* サイズ ( lea, pea, moveq, bset, ... は UNKNOWN ) */
-    opesize default_size;   /* その命令のデフォルトのサイズ */
-    int     bytes;	    /* 命令のバイト数 */
-    opetype flag;	    /* 命令の種類 ( 0 = other jmp jsr rts bcc undef ) */
-    mputypes mputypes;	    /* この命令を実行可能なMPUの種類(M000|M010|...) */
-    char    fpuid;	    /* 浮動小数点命令のコプロセッサID(0-7,-1なら通常命令) */
-    char    opflags;	    /* FLAGS_xxx */
-    char    reserved;	    /* 予約 */
-    address jmp;	    /* ジャンプ先アドレス ( 分岐命令なら ) */
-    adrmode jmpea;	    /* 実効アドレスモード ( 分岐命令なら ) */
-    operand op1;
-    operand op2;
-    operand op3;
-    operand op4;
+	char    opecode[ 32 ];  /* 命令 */
+	opesize size;	    /* サイズ ( lea , pea は long ) ( 0 = .b .w .l .s nothing ) */
+	opesize size2;	    /* サイズ ( lea, pea, moveq, bset, ... は UNKNOWN ) */
+	opesize default_size;   /* その命令のデフォルトのサイズ */
+	int     bytes;	    /* 命令のバイト数 */
+	opetype flag;	    /* 命令の種類 ( 0 = other jmp jsr rts bcc undef ) */
+	mputypes mputypes;	    /* この命令を実行可能なMPUの種類(M000|M010|...) */
+	char    fpuid;	    /* 浮動小数点命令のコプロセッサID(0-7,-1なら通常命令) */
+	char    opflags;	    /* FLAGS_xxx */
+	char    reserved;	    /* 予約 */
+	address jmp;	    /* ジャンプ先アドレス ( 分岐命令なら ) */
+	adrmode jmpea;	    /* 実効アドレスモード ( 分岐命令なら ) */
+	operand op1;
+	operand op2;
+	operand op3;
+	operand op4;
 } disasm;
 
 #define FLAG_CANNOT_UPPER	0x01

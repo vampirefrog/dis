@@ -13,27 +13,27 @@
 
 
 typedef enum {
-    PROLABEL =	0,			/* プログラム */
-    DATLABEL =	0x010000,		/* データ */
-    FORCE    =	0x020000,		/* 強制フラグ */
-    HIDDEN   =	0x040000,		/* 1 ならそのラベルはソース中に現れない */
-    TABLE    =	0x080000,		/* 1 でテーブル開始 */
-    ENDTABLE =	0x100000,		/* 1 でテーブル終了 */
-    SYMLABEL =	0x200000		/* 1 でシンボル情報あり */
+	PROLABEL =	0,			/* プログラム */
+	DATLABEL =	0x010000,		/* データ */
+	FORCE    =	0x020000,		/* 強制フラグ */
+	HIDDEN   =	0x040000,		/* 1 ならそのラベルはソース中に現れない */
+	TABLE    =	0x080000,		/* 1 でテーブル開始 */
+	ENDTABLE =	0x100000,		/* 1 でテーブル終了 */
+	SYMLABEL =	0x200000		/* 1 でシンボル情報あり */
 #ifdef	OSKDIS
-    CODEPTR  =	0x400000,		/* 1 でコードポインタ */
-    DATAPTR  =	0x800000,		/* 1 でデータポインタ */
+	CODEPTR  =	0x400000,		/* 1 でコードポインタ */
+	DATAPTR  =	0x800000,		/* 1 でデータポインタ */
 #endif	/* OSKDIS */
 } lblmode;
 
 
 struct _avl_node;
 typedef struct {
-    address		label;		/* アドレス */
-    struct _avl_node	*avl;		/* AVL-tree-library side node */
-    lblmode		mode;		/* 属性 */
-    short		shift;		/* ずれ */
-    unsigned short	count;		/* 登録回数 */
+	address		label;		/* アドレス */
+	struct _avl_node	*avl;		/* AVL-tree-library side node */
+	lblmode		mode;		/* 属性 */
+	short		shift;		/* ずれ */
+	unsigned short	count;		/* 登録回数 */
 } lblbuf;
 
 

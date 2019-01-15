@@ -16,8 +16,8 @@
 
 
 typedef enum {
-    ANALYZE_IGNOREFAULT,
-    ANALYZE_NORMAL
+	ANALYZE_IGNOREFAULT,
+	ANALYZE_NORMAL
 } analyze_mode;
 
 extern boolean	analyze (address, analyze_mode);

@@ -24,53 +24,53 @@ USEOPTION option_Z;
 extern char*
 itod2 (char* buf, ULONG n)
 {
-    int i = n % 100;
+	int i = n % 100;
 
-    if (i / 10)
+	if (i / 10)
 	*buf++ = (i / 10) + '0';
-    *buf++ = (n % 10) + '0';
-    *buf = '\0';
-    return buf;
+	*buf++ = (n % 10) + '0';
+	*buf = '\0';
+	return buf;
 }
 
 
 extern char*
 itox (char* buf, ULONG n, int width)
 {
-    if (option_Z) {
+	if (option_Z) {
 	if (n == 0)
-	    *buf++ = '0';
+		*buf++ = '0';
 	else {
-	    char tmp[8];
-	    char* p = tmp + sizeof tmp;
-	    int i;
+		char tmp[8];
+		char* p = tmp + sizeof tmp;
+		int i;
 
-	    do {
+		do {
 		/* 下位桁からテンポラリに変換 */
 		*--p = Hex[n & 0xf];
 		n >>= 4;
-	    } while (n);
-	    i = (tmp + sizeof tmp) - p;
-	    do {
+		} while (n);
+		i = (tmp + sizeof tmp) - p;
+		do {
 		/* 上位桁からバッファに転送 */
 		*buf++ = *p++;
-	    } while (--i > 0);
+		} while (--i > 0);
 	}
-    }
+	}
 
-    else {
+	else {
 	char* p = buf += width;
 	int i;
 
 	for (i = width; --i >= 0;) {
-	    /* 下位桁から変換 */
-	    *--p = Hex[n & 0xf];
-	    n >>= 4;
+		/* 下位桁から変換 */
+		*--p = Hex[n & 0xf];
+		n >>= 4;
 	}
-    }
+	}
 
-    *buf = '\0';
-    return buf;
+	*buf = '\0';
+	return buf;
 }
 
 
@@ -78,15 +78,15 @@ itox (char* buf, ULONG n, int width)
 extern char*			\
 func (char *buf, ULONG n)	\
 {				\
-    char* p = buf += width;	\
-    int i;			\
+	char* p = buf += width;	\
+	int i;			\
 				\
-    for (i = width; --i >= 0;) { \
+	for (i = width; --i >= 0;) { \
 	*--p = Hex[n & 0xf];	\
 	n >>= 4;		\
-    }				\
-    *buf = '\0';		\
-    return buf;			\
+	}				\
+	*buf = '\0';		\
+	return buf;			\
 }
 
 DEFINE_ITOX (itox8_without_0supress, 8);
@@ -101,42 +101,42 @@ DEFINE_ITOX (itox4_without_0supress, 4);
 extern char*
 strend (char *p)
 {
-    while (*p++)
+	while (*p++)
 	;
-    return --p;
+	return --p;
 }
 
 
 extern char*
 itox2 (char* buf, ULONG n)
 {
-    if (!option_Z || n >= 0x10) {
+	if (!option_Z || n >= 0x10) {
 	/* 10 の位 */
 	*buf++ = Hex[(n >> 4) & 0xf];
-    }
-    /* 1 の位 */
-    *buf++ = Hex[n & 0xf];
-    *buf = '\0';
-    return buf;
+	}
+	/* 1 の位 */
+	*buf++ = Hex[n & 0xf];
+	*buf = '\0';
+	return buf;
 }
 
 
 extern char*
 itox2_without_0supress (char* buf, ULONG n)
 {
-    *buf++ = Hex[(n >> 4) & 0xf];
-    *buf++ = Hex[n & 0xf];
-    *buf = '\0';
-    return buf;
+	*buf++ = Hex[(n >> 4) & 0xf];
+	*buf++ = Hex[n & 0xf];
+	*buf = '\0';
+	return buf;
 }
 
 
 extern char*
 itoxd (char* buf, ULONG n, int width)
 {
-    if (Zerosupress_mode != 1 || n >= 10)
+	if (Zerosupress_mode != 1 || n >= 10)
 	*buf++ = '$';
-    return (width == 2) ? itox2 (buf, n)
+	return (width == 2) ? itox2 (buf, n)
 			: itox (buf, n, width);
 }
 
@@ -144,16 +144,16 @@ itoxd (char* buf, ULONG n, int width)
 extern char*
 itox6 (char* buf, ULONG n)
 {
-    return itox (buf, n, (n >= 0x1000000) ? 8 : 6);
+	return itox (buf, n, (n >= 0x1000000) ? 8 : 6);
 }
 
 
 extern char*
 itox6d (char* buf, ULONG n)
 {
-    if (Zerosupress_mode != 1 || n >= 10)
+	if (Zerosupress_mode != 1 || n >= 10)
 	*buf++ = '$';
-    return itox6 (buf, n);
+	return itox6 (buf, n);
 }
 
 #endif	/* __GNUC__ */

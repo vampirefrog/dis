@@ -19,11 +19,11 @@
 #endif
 
 #ifdef	__GNUC__
-    #define INLINE inline
-    #undef  alloca
-    #define alloca __builtin_alloca
+	#define INLINE inline
+	#undef  alloca
+	#define alloca __builtin_alloca
 #else
-    #define INLINE
+	#define INLINE
 #endif
 
 

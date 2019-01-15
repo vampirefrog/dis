@@ -25,11 +25,11 @@
 static INLINE void
 foundstr (address pc, address ltemp)
 {
-    charout ('s');
+	charout ('s');
 #ifdef	DEBUG
-    printf ("    * FOUND STRING AT %x - %x \n", pc, ltemp);
+	printf ("    * FOUND STRING AT %x - %x \n", pc, ltemp);
 #endif
-    regist_label (pc, DATLABEL | STRING);
+	regist_label (pc, DATLABEL | STRING);
 }
 
 
@@ -42,63 +42,63 @@ foundstr (address pc, address ltemp)
 private boolean
 is_string (address from, address end, address* newend, int str_min)
 {
-    unsigned char* store;
+	unsigned char* store;
 
 #ifdef DEBUG
-    printf ("  * is_string %x - %x\n", from, end);
+	printf ("  * is_string %x - %x\n", from, end);
 #endif
-    *newend = end;
-    store = from + Ofst;
+	*newend = end;
+	store = from + Ofst;
 
-    while (store - Ofst < end) {
+	while (store - Ofst < end) {
 	unsigned char c = *store++;
 
 	if (isprkana (c))			/* ANK ï∂éö */
-	    ;
+		;
 	else if (iskanji (c)) {			/* ëSäpï∂éö */
-	    if (!iskanji2 (*store++))
+		if (!iskanji2 (*store++))
 		return FALSE;
 	}
 	else if (c == 0x80) {			/* îºäpÇ–ÇÁÇ™Ç» */
-	    c = *store++;
-	    if (c < 0x86 || 0xfc < c)
+		c = *store++;
+		if (c < 0x86 || 0xfc < c)
 		return FALSE;
 	}
 	else {
-	    switch (c) {
-	    case 0x07:	/* BEL */
-	    case 0x09:	/* TAB */
-	    case 0x0d:	/* CR  */
-	    case 0x0a:	/* LF  */
-	    case 0x1a:	/* EOF */
-	    case 0x1b:	/* ESC */
+		switch (c) {
+		case 0x07:	/* BEL */
+		case 0x09:	/* TAB */
+		case 0x0d:	/* CR  */
+		case 0x0a:	/* LF  */
+		case 0x1a:	/* EOF */
+		case 0x1b:	/* ESC */
 		break;
 
-	    case 0x00:	/* NUL */
+		case 0x00:	/* NUL */
 		/* 10 â≠Ç™ .dc.b ';ö ',0 Ç…Ç»ÇÁÇ»Ç¢ÇÊÇ§Ç…Ç∑ÇÈ */
 		if (((UINTPTR) store & 1) == 0
 		 && peekl (store - sizeof (ULONG)) == 1000000000L
 		 && (store - sizeof (ULONG) - Ofst) == from)
-		    return FALSE;
+			return FALSE;
 
 		if (from + str_min < store - Ofst) {
-		    while (store - Ofst < end && !*store)
+			while (store - Ofst < end && !*store)
 			store++;
-		    *newend = (address) min ((ULONG) (store - Ofst), (ULONG) end);
-		    return TRUE;
+			*newend = (address) min ((ULONG) (store - Ofst), (ULONG) end);
+			return TRUE;
 		}
 		return FALSE;
-	    default:
+		default:
 		return FALSE;
-	    }
+		}
 	}
-    }
+	}
 
-    if (from + str_min <= store - Ofst) {
+	if (from + str_min <= store - Ofst) {
 	*newend = (address) min ((ULONG) (store - Ofst), (ULONG) end);
 	return TRUE;
-    }
-    return FALSE;
+	}
+	return FALSE;
 }
 
 
@@ -110,34 +110,34 @@ is_string (address from, address end, address* newend, int str_min)
 private int
 check_data_area (address pc, address nlabel, int str_min)
 {
-    int num_of_str = 0;
+	int num_of_str = 0;
 
 #ifdef	DEBUG
-    printf ("* check_data_area %x - %x \n", pc, nlabel);
+	printf ("* check_data_area %x - %x \n", pc, nlabel);
 #endif
 
-    while (pc < nlabel) {
+	while (pc < nlabel) {
 	address ltemp, nlabel2;
 
 	nlabel2 = ltemp = (address) min ((ULONG) nearadrs (pc), (ULONG) nlabel);
 	while (pc < nlabel2) {
-	    if (is_string (pc, ltemp, &ltemp, str_min)) {
+		if (is_string (pc, ltemp, &ltemp, str_min)) {
 		foundstr (pc, ltemp);
 		num_of_str++;
 		while (depend_address (ltemp) && ltemp + 4 <= nlabel2)
-		    ltemp += 4;
+			ltemp += 4;
 		regist_label (ltemp, DATLABEL | UNKNOWN);
 		pc = ltemp;
 		ltemp = (address) min ((ULONG) nearadrs (pc), (ULONG) nlabel);
-	    }
-	    else
+		}
+		else
 		pc = nlabel2;
 	}
 	while (depend_address (pc))
-	    pc += 4;
-    }
+		pc += 4;
+	}
 
-    return num_of_str;
+	return num_of_str;
 }
 
 
@@ -150,12 +150,12 @@ check_data_area (address pc, address nlabel, int str_min)
 extern int
 search_string (int str_min)
 {
-    lblbuf* nadrs = next (BeginTEXT);
-    lblmode nmode = nadrs->mode;
-    address pc = nadrs->label;		/* ç≈èâ */
-    int num_of_str = 0;
+	lblbuf* nadrs = next (BeginTEXT);
+	lblmode nmode = nadrs->mode;
+	address pc = nadrs->label;		/* ç≈èâ */
+	int num_of_str = 0;
 
-    while (pc < BeginBSS) {
+	while (pc < BeginBSS) {
 	lblmode mode = nmode;
 	address nlabel;
 
@@ -165,12 +165,12 @@ search_string (int str_min)
 	nmode = nadrs->mode;
 
 	if (isDATLABEL (mode) && (mode & 0xff) == UNKNOWN)
-	    num_of_str += check_data_area (pc, nlabel, str_min);
+		num_of_str += check_data_area (pc, nlabel, str_min);
 
 	pc = nlabel;
-    }
+	}
 
-    return num_of_str;
+	return num_of_str;
 }
 
 

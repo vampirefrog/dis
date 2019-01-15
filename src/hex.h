@@ -37,56 +37,56 @@ extern int  Zerosupress_mode;
 INLINE static char*
 strend (char *p)
 {
-    while (*p++)
+	while (*p++)
 	;
-    return --p;
+	return --p;
 }
 
 INLINE static char*
 itox2 (char* buf, ULONG n)
 {
-    USEOPTION option_Z;		/* extern boolean option_Z; */
+	USEOPTION option_Z;		/* extern boolean option_Z; */
 
-    if (!option_Z || n >= 0x10) {
+	if (!option_Z || n >= 0x10) {
 	/* 10 ‚ÌˆÊ */
 	*buf++ = Hex[(n >> 4) & 0xf];
-    }
-    /* 1 ‚ÌˆÊ */
-    *buf++ = Hex[n & 0xf];
-    *buf = '\0';
-    return buf;
+	}
+	/* 1 ‚ÌˆÊ */
+	*buf++ = Hex[n & 0xf];
+	*buf = '\0';
+	return buf;
 }
 
 INLINE static char*
 itox2_without_0supress (char *buf, ULONG n)
 {
-    *buf++ = Hex[(n >> 4) & 0xf];
-    *buf++ = Hex[n & 0xf];
-    *buf = '\0';
-    return buf;
+	*buf++ = Hex[(n >> 4) & 0xf];
+	*buf++ = Hex[n & 0xf];
+	*buf = '\0';
+	return buf;
 }
 
 INLINE static char*
 itoxd (char* buf, ULONG n, int width)
 {
-    if (Zerosupress_mode != 1 || n >= 10)
+	if (Zerosupress_mode != 1 || n >= 10)
 	*buf++ = '$';
-    return (width == 2) ? itox2 (buf, n)
+	return (width == 2) ? itox2 (buf, n)
 			: itox (buf, n, width);
 }
 
 INLINE static char*
 itox6 (char* buf, ULONG n)
 {
-    return itox (buf, n, (n >= 0x1000000) ? 8 : 6);
+	return itox (buf, n, (n >= 0x1000000) ? 8 : 6);
 }
 
 INLINE static char*
 itox6d (char* buf, ULONG n)
 {
-    if (Zerosupress_mode != 1 || n >= 10)
+	if (Zerosupress_mode != 1 || n >= 10)
 	*buf++ = '$';
-    return itox6 (buf, n);
+	return itox6 (buf, n);
 }
 
 #else

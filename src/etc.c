@@ -29,23 +29,23 @@ extern void print_title (void);
 extern ULONG
 atox (char* p)
 {
-    ULONG val = 0;
+	ULONG val = 0;
 
-    if (p[0] == (char)'$')
+	if (p[0] == (char)'$')
 	p++;
-    /* 0x... なら頭の 0x を取り除く */
-    else if (p[0] == (char)'0' && p[1] == (char)'x' && p[2])
+	/* 0x... なら頭の 0x を取り除く */
+	else if (p[0] == (char)'0' && p[1] == (char)'x' && p[2])
 	p += 2;
 
-    while (isxdigit (*(unsigned char*)p)) {
+	while (isxdigit (*(unsigned char*)p)) {
 	unsigned char c = *p++;
 	val <<= 4;
 	if (isdigit (c))
-	    val += c - '0';
+		val += c - '0';
 	else
-	    val += tolower (c) - 'a' + 10;
-    }
-    return val;
+		val += tolower (c) - 'a' + 10;
+	}
+	return val;
 }
 
 
@@ -53,19 +53,19 @@ atox (char* p)
 extern void
 err (const char* fmt, ...)
 {
-    va_list ap;
+	va_list ap;
 
-    print_title ();
-    va_start (ap, fmt);
-    vfprintf (stderr, fmt, ap);
-    va_end (ap);
+	print_title ();
+	va_start (ap, fmt);
+	vfprintf (stderr, fmt, ap);
+	va_end (ap);
 
-    free_labelbuf ();
-    free_relocate_buffer ();
-    free_symbuf ();
-    free_load_buffer ();
+	free_labelbuf ();
+	free_relocate_buffer ();
+	free_symbuf ();
+	free_load_buffer ();
 
-    exit (EXIT_FAILURE);
+	exit (EXIT_FAILURE);
 }
 
 
@@ -77,14 +77,14 @@ err (const char* fmt, ...)
 extern void*
 Malloc (ULONG byte)
 {
-    void* rc;
+	void* rc;
 
-    if (byte == 0)
+	if (byte == 0)
 	byte = 1;
-    if ((rc = malloc (byte)) == NULL)
+	if ((rc = malloc (byte)) == NULL)
 	err ("ヒープメモリが不足しています.\n");
 
-    return rc;
+	return rc;
 }
 
 
@@ -95,13 +95,13 @@ Malloc (ULONG byte)
 
   free() は NULL を渡した場合は何もせずに正常終了するので、通常は
   #define Mfree(ptr) free(ptr)
-  としておきます.  
+  としておきます.
 
 */
 extern void
 Mfree (void* ptr)
 {
-    if (ptr)
+	if (ptr)
 	free (ptr);
 }
 #endif
@@ -115,12 +115,12 @@ Mfree (void* ptr)
 extern void*
 Realloc (void* ptr, int size)
 {
-    void* rc;
+	void* rc;
 
-    
-    if ((rc = realloc (ptr, size)) == NULL)
+
+	if ((rc = realloc (ptr, size)) == NULL)
 	err ("Heap memory is insufficient.\n");
-    return rc;
+	return rc;
 }
 
 
@@ -128,13 +128,13 @@ Realloc (void* ptr, int size)
 extern int
 eprintf (const char* fmt, ...)
 {
-    int cnt;
-    va_list ap;
+	int cnt;
+	va_list ap;
 
-    va_start (ap, fmt);
-    cnt = vfprintf (stderr, fmt, ap);
-    va_end (ap);
-    return cnt;
+	va_start (ap, fmt);
+	cnt = vfprintf (stderr, fmt, ap);
+	va_end (ap);
+	return cnt;
 }
 #endif
 
@@ -142,7 +142,7 @@ eprintf (const char* fmt, ...)
 extern int
 eputc (int c)
 {
-    return fputc (c, stderr);
+	return fputc (c, stderr);
 }
 
 
@@ -150,13 +150,13 @@ eputc (int c)
 extern ULONG
 min (ULONG a, ULONG b)
 {
-    return a < b ? a : b;
+	return a < b ? a : b;
 }
 
 extern ULONG
 max (ULONG a, ULONG b);
 {
-    return a > b ? a : b;
+	return a > b ? a : b;
 }
 #endif
 
@@ -165,13 +165,13 @@ max (ULONG a, ULONG b);
 extern char*
 strupr (char* str)
 {
-    unsigned char* p;
+	unsigned char* p;
 
-    for (p = (unsigned char*) str; *p; p++) {
+	for (p = (unsigned char*) str; *p; p++) {
 	if (islower (*p))
-	    *p = toupper (*p);
-    }
-    return str;
+		*p = toupper (*p);
+	}
+	return str;
 }
 #endif
 

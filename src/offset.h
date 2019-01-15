@@ -18,9 +18,9 @@ extern boolean	depend_address (address);
 extern address	nearadrs (address);
 
 #define INPROG(opval, eaadrs) \
-    (depend_address (eaadrs) || \
-    (Absolute == ABSOLUTE_ZFILE && Head.base - 0x100 <= opval) || \
-    (Absolute == ABSOLUTE_ZOPT && Head.base <= opval && opval <= Last))
+	(depend_address (eaadrs) || \
+	(Absolute == ABSOLUTE_ZFILE && Head.base - 0x100 <= opval) || \
+	(Absolute == ABSOLUTE_ZOPT && Head.base <= opval && opval <= Last))
 
 
 #endif	/* OFFSET_H */

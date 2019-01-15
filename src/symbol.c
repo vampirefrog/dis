@@ -33,7 +33,7 @@ static int	Symnum;			/* シンボルテーブルの要素数 */
 extern void
 init_symtable (void)
 {
-    return;
+	return;
 }
 
 /*
@@ -46,13 +46,13 @@ init_symtable (void)
 extern void
 free_symbuf (void)
 {
-    Mfree (Symtable);
+	Mfree (Symtable);
 }
 
 extern boolean
 is_exist_symbol (void)
 {
-    return Symnum ? TRUE : FALSE;
+	return Symnum ? TRUE : FALSE;
 }
 
 
@@ -72,16 +72,16 @@ is_exist_symbol (void)
 extern int
 output_symbol_table (const char* op_equ, const char* op_xdef, const char* colon)
 {
-    char* ptr = (char*)(Top + Head.text + Head.data + Head.offset);
-    ULONG end = (ULONG)ptr + Head.symbol
-	      - (sizeof (UWORD) + sizeof (address) + 2);
-    int out_xdef = (Output_Symbol == 2);
-    int count = 0;
+	char* ptr = (char*)(Top + Head.text + Head.data + Head.offset);
+	ULONG end = (ULONG)ptr + Head.symbol
+		  - (sizeof (UWORD) + sizeof (address) + 2);
+	int out_xdef = (Output_Symbol == 2);
+	int count = 0;
 
-    if ((UINTPTR)ptr & 1 || !Output_Symbol)
+	if ((UINTPTR)ptr & 1 || !Output_Symbol)
 	return count;
 
-    while ((ULONG)ptr <= end) {
+	while ((ULONG)ptr <= end) {
 	UWORD type;
 	address adrs;
 
@@ -91,11 +91,11 @@ output_symbol_table (const char* op_equ, const char* op_xdef, const char* colon)
 	ptr += sizeof (address);
 
 	if (*ptr && *ptr != (char)'*') {
-	    char buf[16];
-	    char* tab;
+		char buf[16];
+		char* tab;
 
-	    switch (type) {
-	    case XDEF_ABS:
+		switch (type) {
+		case XDEF_ABS:
 		/* 「xxx:: .equ $nn」の形式で出力する */
 				  /* TAB-2 */
 		tab = (strlen (ptr) < (8-2)) ? "\t" : "";
@@ -104,29 +104,29 @@ output_symbol_table (const char* op_equ, const char* op_xdef, const char* colon)
 		count++;
 		break;
 
-	    case XDEF_COMMON:
-	    case XDEF_TEXT:
-	    case XDEF_DATA:
-	    case XDEF_BSS:
-	    case XDEF_STACK:
+		case XDEF_COMMON:
+		case XDEF_TEXT:
+		case XDEF_DATA:
+		case XDEF_BSS:
+		case XDEF_STACK:
 		if (out_xdef) {
-		    outputf ("%s%s" CR, op_xdef, ptr);
-		    count++;
+			outputf ("%s%s" CR, op_xdef, ptr);
+			count++;
 		}
 		break;
 
-	    default:
+		default:
 		break;
-	    }
+		}
 	}
 
 	/* 今処理したシンボルを飛ばす */
 	while (*ptr++)
-	    ;
+		;
 	ptr += (UINTPTR)ptr & 1;
-    }
+	}
 
-    return count;
+	return count;
 }
 
 
@@ -139,15 +139,15 @@ output_symbol_table (const char* op_equ, const char* op_xdef, const char* colon)
 static void
 change_sym_type (symbol* symbolptr, int type, char* ptr)
 {
-    symlist* sym = &symbolptr->first;
+	symlist* sym = &symbolptr->first;
 
-    do {
+	do {
 	if (strcmp (sym->sym, ptr) == 0) {
-	    sym->type = type;
-	    return;
+		sym->type = type;
+		return;
 	}
 	sym = sym->next;
-    } while (sym);
+	} while (sym);
 }
 
 /*
@@ -159,14 +159,14 @@ change_sym_type (symbol* symbolptr, int type, char* ptr)
 extern void
 make_symtable (void)
 {
-    char* ptr = (char*)(Top + Head.text + Head.data + Head.offset);
-    ULONG end = (ULONG)ptr + Head.symbol
-	      - (sizeof (UWORD) + sizeof (address) + 2);
+	char* ptr = (char*)(Top + Head.text + Head.data + Head.offset);
+	ULONG end = (ULONG)ptr + Head.symbol
+		  - (sizeof (UWORD) + sizeof (address) + 2);
 
-    if ((UINTPTR)ptr & 1)
+	if ((UINTPTR)ptr & 1)
 	return;
 
-    while ((ULONG)ptr <= end) {
+	while ((ULONG)ptr <= end) {
 	UWORD type;
 	address adrs;
 
@@ -177,57 +177,57 @@ make_symtable (void)
 
 	if (!*ptr) {
 #if 0
-	    eprintf ("シンボル名が空文字列です(%#.6x %#.6x)", type, adrs);
+		eprintf ("シンボル名が空文字列です(%#.6x %#.6x)", type, adrs);
 #endif
 	} else if (*ptr == (char)'*') {
-	    eprintf ("アドレス境界情報のシンボルです(%#.6x %#.6x %s)\n",
+		eprintf ("アドレス境界情報のシンボルです(%#.6x %#.6x %s)\n",
 							type, adrs, ptr);
 	}
 
 	else {
-	    symbol* sym;
+		symbol* sym;
 
-	    /* スタックサイズの収得 */
-	    if (type == XDEF_STACK && BeginBSS <= adrs && adrs < BeginSTACK)
+		/* スタックサイズの収得 */
+		if (type == XDEF_STACK && BeginBSS <= adrs && adrs < BeginSTACK)
 		BeginSTACK = adrs;
 
-	    switch (type) {
-	    case XDEF_ABS:
+		switch (type) {
+		case XDEF_ABS:
 		break;
 
-	    case XDEF_COMMON:
+		case XDEF_COMMON:
 		type = XDEF_BSS;
 		/* fall through */
-	    case XDEF_STACK:
-	    case XDEF_TEXT:
-	    case XDEF_DATA:
-	    case XDEF_BSS:
+		case XDEF_STACK:
+		case XDEF_TEXT:
+		case XDEF_DATA:
+		case XDEF_BSS:
 		sym = symbol_search (adrs);
 
 		if (!sym)
-		    regist_label (adrs, DATLABEL | UNKNOWN | SYMLABEL);
+			regist_label (adrs, DATLABEL | UNKNOWN | SYMLABEL);
 
 		/* -g 指定時はシンボルテーブルから登録しない */
 		/* ただし、属性だけは利用する		     */
 		if (!option_g)
-		    add_symbol (adrs, type, ptr);
+			add_symbol (adrs, type, ptr);
 		else if (sym)
-		    change_sym_type (sym, type, ptr);
+			change_sym_type (sym, type, ptr);
 		break;
 
-	    default:
+		default:
 		eprintf ("未対応のシンボル情報です(%#.6x %#.6x %s)\n",
 							type, adrs, ptr);
 		break;
 
-	    }
+		}
 	}
 
 	/* 今処理したシンボルを飛ばす */
 	while (*ptr++)
-	    ;
+		;
 	ptr += (UINTPTR)ptr & 1;
-    }
+	}
 }
 
 
@@ -237,16 +237,16 @@ make_symtable (void)
 extern symlist*
 symbol_search2 (address adrs, int type)
 {
-    symbol* symbolptr = symbol_search (adrs);
+	symbol* symbolptr = symbol_search (adrs);
 
-    if (symbolptr) {
+	if (symbolptr) {
 	symlist* sym = &symbolptr->first;
 
 	while (sym->type != (UWORD)type && (sym = sym->next))
-	    ;
+		;
 	return sym;
-    }
-    return (symlist*)NULL;
+	}
+	return (symlist*)NULL;
 }
 
 #endif	/* !OSKDIS */
@@ -255,15 +255,15 @@ symbol_search2 (address adrs, int type)
 extern void
 add_symbol (address adrs, int type, char *symstr)
 {			   /* type == 0 : labelfileでの定義 */
-    int  i;
-    symbol* sym = symbol_search (adrs);
+	int  i;
+	symbol* sym = symbol_search (adrs);
 
-    /* 既に登録済みならシンボル名を追加する */
-    if (sym) {
+	/* 既に登録済みならシンボル名を追加する */
+	if (sym) {
 	symlist* ptr = &sym->first;
 
 	while (ptr->next)
-	    ptr = ptr->next;
+		ptr = ptr->next;
 
 	/* symlist を確保して、末尾に繋げる */
 	ptr = ptr->next = Malloc (sizeof (symlist));
@@ -274,28 +274,28 @@ add_symbol (address adrs, int type, char *symstr)
 	ptr->sym = symstr;
 
 	return;
-    }
+	}
 
-    if (Symnum == Symbolbufsize) {
+	if (Symnum == Symbolbufsize) {
 	/* バッファを拡大する */
 	Symbolbufsize += SYM_BUF_UNIT;
 	Symtable = Realloc (Symtable, Symbolbufsize * sizeof (symbol));
-    }
+	}
 
-    for (i = Symnum - 1; (i >= 0) && (Symtable[ i ].adrs > adrs); i--)
+	for (i = Symnum - 1; (i >= 0) && (Symtable[ i ].adrs > adrs); i--)
 	Symtable[ i + 1 ] = Symtable[ i ];
 
-    Symnum++;
-    sym = &Symtable[ ++i ];
-    sym->adrs = adrs;
+	Symnum++;
+	sym = &Symtable[ ++i ];
+	sym->adrs = adrs;
 
-    /* 最初のシンボルを記録 */
-    sym->first.next = NULL;
-    sym->first.type = (UWORD)type;
-    sym->first.sym  = symstr;
+	/* 最初のシンボルを記録 */
+	sym->first.next = NULL;
+	sym->first.type = (UWORD)type;
+	sym->first.sym  = symstr;
 
 #ifdef	DEBUG
-    printf ("type %.4x adrs %.6x sym:%s\n", sym->first.type, sym->.adrs, sym->first.sym);
+	printf ("type %.4x adrs %.6x sym:%s\n", sym->first.type, sym->.adrs, sym->first.sym);
 #endif
 }
 
@@ -310,26 +310,26 @@ add_symbol (address adrs, int type, char *symstr)
 extern symbol*
 symbol_search (address adrs)
 {
-    int step;
-    symbol* ptr;
+	int step;
+	symbol* ptr;
 
-    /* 多少は速くなる? */
-    if (Symnum == 0)
+	/* 多少は速くなる? */
+	if (Symnum == 0)
 	return NULL;
 
-    ptr = Symtable;
-    for (step = Symnum >> 1; step > 4; step >>= 1)
+	ptr = Symtable;
+	for (step = Symnum >> 1; step > 4; step >>= 1)
 	if ((ptr + step)->adrs <= adrs)		/* binary search */
-	    ptr += step;
+		ptr += step;
 
-    for (; ptr < Symtable + Symnum; ptr++) {
+	for (; ptr < Symtable + Symnum; ptr++) {
 	if (ptr->adrs == adrs)
-	    return ptr;
+		return ptr;
 	else
-	    if (adrs < ptr->adrs)
+		if (adrs < ptr->adrs)
 		return NULL;
-    }
-    return NULL;
+	}
+	return NULL;
 }
 
 
@@ -339,21 +339,21 @@ symbol_search (address adrs)
 extern void
 del_symbol (address adrs)
 {
-    symbol* sym = symbol_search (adrs);
+	symbol* sym = symbol_search (adrs);
 
-    if (sym) {
+	if (sym) {
 	symlist* ptr = sym->first.next;
 
 	while (ptr) {
-	    symlist* next = ptr->next;
-	    Mfree (ptr);
-	    ptr = next;
+		symlist* next = ptr->next;
+		Mfree (ptr);
+		ptr = next;
 	}
 
 	Symnum--;
 	for (; sym < &Symtable[ Symnum ]; sym++)
-	    *sym = *(sym + 1);
-    }
+		*sym = *(sym + 1);
+	}
 }
 #endif
 

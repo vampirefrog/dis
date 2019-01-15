@@ -15,20 +15,20 @@
 
 
 typedef union {
-    struct {
+	struct {
 	unsigned long hi;
 	unsigned long lo;
-    } ul;
-    double d;
+	} ul;
+	double d;
 } quadword;
 
 typedef union {
-    struct {
+	struct {
 	unsigned long hi;
 	unsigned long mi;
 	unsigned long lo;
-    } ul;
-    unsigned char uc[12];
+	} ul;
+	unsigned char uc[12];
 } packed_decimal;
 
 

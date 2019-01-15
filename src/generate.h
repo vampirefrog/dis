@@ -16,9 +16,9 @@
 #include "estruct.h"	/* typedef LONG, ULONG */
 
 typedef enum {
-    SIZE_NORMAL,
-    SIZE_OMIT,
-    SIZE_NOT_OMIT
+	SIZE_NORMAL,
+	SIZE_OMIT,
+	SIZE_NOT_OMIT
 } size_mode;
 
 extern	void	generate (char*, char*, time_t, int, char*[]);

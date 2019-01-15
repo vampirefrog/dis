@@ -34,20 +34,20 @@ private void
 oops_undefined (address pc0, address previous_pc, address nlabel)
 {
 
-    charout ('+');
-    eprintf ("\n* WARNING! UNDEFINED INSTRUCTION FOUND.\n"
-	     "%x - %x (%x)\n", pc0, nlabel, previous_pc);
-    not_program (pc0, nlabel);
-    Undefined_instruction_count++;
+	charout ('+');
+	eprintf ("\n* WARNING! UNDEFINED INSTRUCTION FOUND.\n"
+		 "%x - %x (%x)\n", pc0, nlabel, previous_pc);
+	not_program (pc0, nlabel);
+	Undefined_instruction_count++;
 }
 
 
 private address
 labelshift (address previous_pc, address pc, address end, lblbuf* nadrs)
 {
-    address nlabel = nadrs->label;
+	address nlabel = nadrs->label;
 
-    while (nlabel < pc) {
+	while (nlabel < pc) {
 	charout ('!');
 	nadrs->shift = nlabel - previous_pc;
 	regist_label (previous_pc, PROLABEL);
@@ -57,12 +57,12 @@ labelshift (address previous_pc, address pc, address end, lblbuf* nadrs)
 #endif
 	nadrs = Next (nadrs);		/* nadrs = next (nlabel + 1); */
 	nlabel = nadrs->label;
-    }
+	}
 
-    if (nlabel >= end)	/* 泥縄 (^_^;) */
+	if (nlabel >= end)	/* 泥縄 (^_^;) */
 	return next_datlabel (previous_pc)->label;
 
-    return end;
+	return end;
 }
 
 
@@ -74,9 +74,9 @@ labelshift (address previous_pc, address pc, address end, lblbuf* nadrs)
 private boolean
 datlabel (address adrs)
 {
-    lblbuf* ptr = search_label (adrs);
+	lblbuf* ptr = search_label (adrs);
 
-    return (ptr && isDATLABEL (ptr->mode)) ? TRUE : FALSE;
+	return (ptr && isDATLABEL (ptr->mode)) ? TRUE : FALSE;
 }
 
 
@@ -88,17 +88,17 @@ datlabel (address adrs)
 private address
 search_change_operand (address from, address end)
 {
-    address nlabel, pc, previous_pc, pc0;
-    disasm  code;
-    boolean was_prog = FALSE;		/* 直前の領域がプログラムであったかどうか */
+	address nlabel, pc, previous_pc, pc0;
+	disasm  code;
+	boolean was_prog = FALSE;		/* 直前の領域がプログラムであったかどうか */
 
-    pc = previous_pc = pc0 = from;
+	pc = previous_pc = pc0 = from;
 
 #ifdef	DEBUG
-    printf ("search_ch_op(%x - %x)\n", from, end);
+	printf ("search_ch_op(%x - %x)\n", from, end);
 #endif
 
-    while (end != (address)-1 && pc < end) {
+	while (end != (address)-1 && pc < end) {
 	lblbuf* nadrs = next (pc + 1);
 	address store = pc + Ofst;
 
@@ -109,60 +109,60 @@ search_change_operand (address from, address end)
 	/* ２つのプログラムラベル間を逆アセンブル */
 	while (pc < nlabel && pc < end) {
 #ifdef	DEBUG
-	    printf ("%x,%x\n", pc, nlabel);
+		printf ("%x,%x\n", pc, nlabel);
 #endif
-	    previous_pc = pc;
-	    store += dis (store, &code, &pc);
-	    if (code.flag == UNDEF) {		/* 未定義命令なら警告 */
+		previous_pc = pc;
+		store += dis (store, &code, &pc);
+		if (code.flag == UNDEF) {		/* 未定義命令なら警告 */
 		oops_undefined (pc0, previous_pc, nlabel);
 #ifdef	OSKDIS
 		/* 未定義命令をデータにする */
 		regist_label (previous_pc, DATLABEL | FORCE);
 #endif	/* OSKDIS */
 		pc = nlabel;
-	    }
+		}
 	}
 
 	/* 命令の途中にアクセスしているなら */
 	if (pc != nlabel) {
 #ifdef	DEBUG
-	    printf ("* label in instruction (%x, %x)\n", pc, nlabel);
+		printf ("* label in instruction (%x, %x)\n", pc, nlabel);
 #endif
-	    Label_on_instruction_count++;
-	    if (option_k
-	     || (!option_E && code.size == BYTESIZE
+		Label_on_instruction_count++;
+		if (option_k
+		 || (!option_E && code.size == BYTESIZE
 		&& code.op1.eaadrs + 1 != nlabel
 		&& code.op2.eaadrs + 1 != nlabel
 		&& code.op3.eaadrs + 1 != nlabel
 		&& code.op4.eaadrs + 1 != nlabel))
-	    {
+		{
 		charout ('*');
 		Fixed_count++;
 		not_program (pc0, nlabel);
 		if (option_I)
-		    eprintf ("\nLabel to insert in command(%x) -> "
-			     "Changed to data area(%x-%x)\n",
+			eprintf ("\nLabel to insert in command(%x) -> "
+				 "Changed to data area(%x-%x)\n",
 				nlabel, pc0, nlabel);
 		pc = nlabel;
 		was_prog = FALSE;
-	    }
-	    else {
+		}
+		else {
 		end = labelshift (previous_pc, pc, end, nadrs);
 		if (option_I)
-		    eprintf ("\nLabel to insert in command(%x -> %x+%x)\n",
+			eprintf ("\nLabel to insert in command(%x -> %x+%x)\n",
 				nlabel, previous_pc, nlabel - previous_pc);
-	    }
+		}
 	}
-    }
-    if (code.flag != RTSOP && code.flag != JMPOP && datlabel (pc) && was_prog) {
+	}
+	if (code.flag != RTSOP && code.flag != JMPOP && datlabel (pc) && was_prog) {
 	charout ('-');
 #ifdef	DEBUG
 	printf ("datlabel in prolabel %x\n", pc);
 #endif
 	regist_label (pc, PROLABEL);
-    }
+	}
 
-    return end;
+	return end;
 }
 
 
@@ -174,16 +174,16 @@ search_change_operand (address from, address end)
 private void
 search_change_data (address from, address end)
 {
-    address pc, pc0;
-    lblbuf* nadrs;
+	address pc, pc0;
+	lblbuf* nadrs;
 
-    pc = pc0 = from;
-    nadrs = next (pc);
+	pc = pc0 = from;
+	nadrs = next (pc);
 #ifdef	DEBUG
-    printf ("search_ch_dat(%x - %x)\n", from, end);
+	printf ("search_ch_dat(%x - %x)\n", from, end);
 #endif
 
-    while (end != (address)-1 && pc < end) {
+	while (end != (address)-1 && pc < end) {
 	address dependadrs = nearadrs (pc);
 	address nlabel;
 
@@ -191,20 +191,20 @@ search_change_data (address from, address end)
 	nlabel = nadrs->label;
 
 	while (dependadrs != (address)-1 && dependadrs + 4 <= nlabel)
-	    dependadrs = nearadrs (dependadrs + 1);
+		dependadrs = nearadrs (dependadrs + 1);
 
 	while (dependadrs < nlabel && nlabel < dependadrs + 4) {
-	    charout ('!');
-	    nadrs->shift = nlabel - dependadrs;
-	    regist_label (dependadrs, DATLABEL | UNKNOWN);
+		charout ('!');
+		nadrs->shift = nlabel - dependadrs;
+		regist_label (dependadrs, DATLABEL | UNKNOWN);
 #ifdef	DEBUG
-	    printf ("* FOUND at %x (diff %d) in data\n", dependadrs, nlabel - dependadrs);
+		printf ("* FOUND at %x (diff %d) in data\n", dependadrs, nlabel - dependadrs);
 #endif
-	    nadrs = Next (nadrs);	/* nadrs = next (nlabel + 1); */
-	    nlabel = nadrs->label;
+		nadrs = Next (nadrs);	/* nadrs = next (nlabel + 1); */
+		nlabel = nadrs->label;
 	}
 	pc = nlabel;
-    }
+	}
 }
 
 
@@ -212,14 +212,14 @@ extern void
 search_operand_label (void)
 {
 #if 0
-    address tmp;
+	address tmp;
 #endif
-    lblbuf* nadrs = next (BeginTEXT);
-    address pc, pcend = nadrs->label;
+	lblbuf* nadrs = next (BeginTEXT);
+	address pc, pcend = nadrs->label;
 
-    PCEND = Available_text_end;
+	PCEND = Available_text_end;
 
-    while (nadrs->label < Available_text_end) {
+	while (nadrs->label < Available_text_end) {
 	charout ('.');
 	nadrs = next_prolabel (pcend);
 
@@ -228,37 +228,37 @@ search_operand_label (void)
 	pcend = nadrs->label;
 #if 0
 	if (tmp == pcend) {
-	    nadrs = next_prolabel (pcend + 1);
-	    pc    = nadrs->label;
-	    nadrs = next_datlabel (pc);
-	    pcend = nadrs->label;
-	    printf ("ドロナワ処理をしました.\n");
+		nadrs = next_prolabel (pcend + 1);
+		pc    = nadrs->label;
+		nadrs = next_datlabel (pc);
+		pcend = nadrs->label;
+		printf ("ドロナワ処理をしました.\n");
 	}
 	tmp = pcend;
 #endif
 
 #ifdef	OSKDIS
 	if (nadrs->label >= Available_text_end)
-	    break;	/* 泥縄 */
+		break;	/* 泥縄 */
 #endif	/* OSKDIS */
 
 	if (pcend != (address)-1)
-	    pcend = search_change_operand (pc, pcend);
-    }
+		pcend = search_change_operand (pc, pcend);
+	}
 
-    charout ('\n');
-    if (Label_on_instruction_count) {
+	charout ('\n');
+	if (Label_on_instruction_count) {
 	if (option_q)
-	    eputc ('\n');
+		eputc ('\n');
 	eprintf ("%d labels pointing in instructions.\n", Label_on_instruction_count);
 	if (Fixed_count)
-	    eprintf ("%d areas have been changed to data area.\n", Fixed_count);
-    }
+		eprintf ("%d areas have been changed to data area.\n", Fixed_count);
+	}
 
-    nadrs = next (BeginTEXT);
-    pcend = nadrs->label;
+	nadrs = next (BeginTEXT);
+	pcend = nadrs->label;
 
-    while (nadrs->label < BeginBSS) {
+	while (nadrs->label < BeginBSS) {
 	charout (':');
 	nadrs = next_datlabel (pcend);
 	pc = nadrs->label;
@@ -266,11 +266,11 @@ search_operand_label (void)
 	pcend = min (nadrs->label, BeginBSS);
 #if 0
 	if (tmp == pcend) {
-	    nadrs = next_datlabel (pcend);
-	    pc = nadrs->label;
-	    nadrs = next_prolabel (pc + 1);
-	    pcend = min (nadrs->label, BeginBSS);
-	    printf ("ドロナワ処理2をしました.\n");
+		nadrs = next_datlabel (pcend);
+		pc = nadrs->label;
+		nadrs = next_prolabel (pc + 1);
+		pcend = min (nadrs->label, BeginBSS);
+		printf ("ドロナワ処理2をしました.\n");
 	}
 	tmp = pcend;
 #endif
@@ -280,12 +280,12 @@ search_operand_label (void)
 	printf ("chk %x - %x\n", pc, pcend);
 #endif
 	if (pc < BeginBSS)
-	    search_change_data (pc, pcend);
-    }
-    if (Undefined_instruction_count)	/* ラベルチェックに引っ掛かるとデータ消失 ? */
+		search_change_data (pc, pcend);
+	}
+	if (Undefined_instruction_count)	/* ラベルチェックに引っ掛かるとデータ消失 ? */
 	analyze_data ();
 
-    if (!option_q || !Label_on_instruction_count)
+	if (!option_q || !Label_on_instruction_count)
 	eputc ('\n');
 }
 

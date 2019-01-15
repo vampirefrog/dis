@@ -73,13 +73,13 @@ ULONG	Ofst;		/* 実際のアドレス - 仮想アドレス */
 
 /********************************************
   Human68K 用（-DOSKDIS 無）の場合は、
-    BeginTEXT = text section の先頭
-    BeginDATA = data section の先頭
-    BeginBSS  = bss section の先頭
+	BeginTEXT = text section の先頭
+	BeginDATA = data section の先頭
+	BeginBSS  = bss section の先頭
   OS-9/680x0 用（-DOSKDIS 有）の場合は、
-    BeginTEXT = psect 先頭
-    BeginDATA = 初期化 vsect 先頭
-    BeginBSS  = vsect 先頭
+	BeginTEXT = psect 先頭
+	BeginDATA = 初期化 vsect 先頭
+	BeginBSS  = vsect 先頭
 *********************************************/
 
 address BeginTEXT,
@@ -116,9 +116,9 @@ char*	Tablefilename;
 extern void
 print_title (void)
 {
-    static char flag = 1;
+	static char flag = 1;
 
-    if (flag) {
+	if (flag) {
 	flag = 0;
 
 	eprintf ("Source Code Generator for X680x0"
@@ -141,32 +141,32 @@ print_title (void)
 #ifdef	OSKDIS
 	eprintf ("OS-9/68000 version %s by TEMPLE, 1994\n", OSKEdition);
 #endif
-    }
+	}
 }
 
 
 typedef struct {
-    short bit;
-    char* name;
+	short bit;
+	char* name;
 } target_table;
 
 private void
 print_target (char* str, int bits, const target_table* tbl, int size)
 {
-    if (bits) {
+	if (bits) {
 	int f = '\0';
 	eprintf (str);
 	do {
-	    if (bits & tbl->bit) {
+		if (bits & tbl->bit) {
 		if (f)
-		    eputc (f);
+			eputc (f);
 		eprintf (tbl->name);
 		f = ',';
-	    }
-	    tbl++;
+		}
+		tbl++;
 	} while (--size);
 	eputc ('\n');
-    }
+	}
 }
 
 
@@ -182,20 +182,20 @@ static time_t	Filedate;
 static INLINE address
 loadfile (char* filename)
 {
-    int		handle;
-    address	top;
-    ULONG	bytes;
-    struct stat	statbuf;
+	int		handle;
+	address	top;
+	ULONG	bytes;
+	struct stat	statbuf;
 
-    if ((handle = open (filename, O_BINARY | O_RDONLY)) == -1)
+	if ((handle = open (filename, O_BINARY | O_RDONLY)) == -1)
 	err ("Could not open %s\n", filename);
 
-    if (fstat( handle , &statbuf) < 0)
+	if (fstat( handle , &statbuf) < 0)
 	err ("fstat failed.\n");
-    Filedate = statbuf.st_mtime;
+	Filedate = statbuf.st_mtime;
 
 #ifdef	OSKDIS
-    if (option_z) {
+	if (option_z) {
 	Head.base = Base;
 	Head.exec = Exec;
 	Head.text = statbuf.st_size;
@@ -203,33 +203,33 @@ loadfile (char* filename)
 	Head.bss = 0;
 	Head.symbol = 0;
 	Head.bindinfo = 0;
-    }
-    else {
+	}
+	else {
 	if (read (handle, (char *)&HeadOSK, sizeof (HeadOSK)) != sizeof (HeadOSK))
-	    goto os9head_error;
+		goto os9head_error;
 	if (HeadOSK.head != 0x4afc) {
-	    eprintf ("ID=%04X\n", HeadOSK.head);
+		eprintf ("ID=%04X\n", HeadOSK.head);
 os9head_error:
-	    close(handle);
-	    err ("It is not a module of OS-9/680x0.\n");
+		close(handle);
+		err ("It is not a module of OS-9/680x0.\n");
 	}
 	switch (HeadOSK.type & 0x0f00) {
-	    case 0x0100:	/* Program */
+		case 0x0100:	/* Program */
 		Head.base = 0x0048;
 		Head.bss = HeadOSK.mem;
 		break;
-	    case 0x0b00:	/* Trap */
+		case 0x0b00:	/* Trap */
 		Head.base = 0x0048;
 		Head.bss = HeadOSK.mem;
 		break;
-	    case 0x0200:	/* Subroutine */
-	    case 0x0c00:	/* System     */
-	    case 0x0d00:	/* FileMan    */
-	    case 0x0e00:	/* Driver     */
+		case 0x0200:	/* Subroutine */
+		case 0x0c00:	/* System     */
+		case 0x0d00:	/* FileMan    */
+		case 0x0e00:	/* Driver     */
 		Head.base = 0x003c;
 		Head.bss = HeadOSK.mem;
 		break;
-	    default:
+		default:
 		close(handle);
 		err ("This module type is not supported.\n");
 	}
@@ -239,33 +239,33 @@ os9head_error:
 	Head.data = 0;
 	Head.symbol = 0;
 	Head.bindinfo = 0;
-    }
+	}
 #else
-    if (FileType == 0) {
+	if (FileType == 0) {
 	char*	ext = strrchr (filename, '.');
 
 	/* R 形式は拡張子で判別する */
 	if (ext && strcasecmp (ext, ".r") == 0)
-	    FileType = 'r';
+		FileType = 'r';
 	else {
-	    char buf[2];
+		char buf[2];
 
-	    /* 先頭 2 バイトを読み込む */
-	    if (read (handle, buf, 2) < 2)
+		/* 先頭 2 バイトを読み込む */
+		if (read (handle, buf, 2) < 2)
 		goto filetype_error;		/* 2 バイト未満なら実行ファイルではない */
-	    lseek (handle, 0, SEEK_SET);
+		lseek (handle, 0, SEEK_SET);
 
-	    /* ファイル形式を判別する */
-	    if (buf[0] == (char)'H' && buf[1] == (char)'U')
+		/* ファイル形式を判別する */
+		if (buf[0] == (char)'H' && buf[1] == (char)'U')
 		FileType = 'x';
-	    else if (buf[0] == (char)0x60 && buf[1] == (char)0x1a)
+		else if (buf[0] == (char)0x60 && buf[1] == (char)0x1a)
 		FileType = 'z';
-	    else
+		else
 		goto filetype_error;
 	}
-    }
+	}
 
-    if (option_z || FileType == (char)'r') {
+	if (option_z || FileType == (char)'r') {
 	Head.base = Base;
 	Head.exec = Exec;
 	Head.text = statbuf.st_size;
@@ -273,11 +273,11 @@ os9head_error:
 	Head.bss = 0;
 	Head.symbol = 0;
 	Head.bindinfo = 0;
-    } else if (FileType == (char)'z') {
+	} else if (FileType == (char)'z') {
 	zheader zhead;
 
 	if (read (handle, (char*) &zhead, sizeof (zhead)) != sizeof (zhead))
-	    goto filetype_error;
+		goto filetype_error;
 	Head.exec = Head.base = (address) peekl (&zhead.base);
 	Head.text = peekl (&zhead.text);
 	Head.data = peekl (&zhead.data);
@@ -285,12 +285,12 @@ os9head_error:
 	Head.symbol = 0;
 	Head.bindinfo = 0;
 	Absolute = ABSOLUTE_ZFILE;
-    } else {            /* if (FileType == (char)'x') */
+	} else {            /* if (FileType == (char)'x') */
 	xfileheader fh;
 	if (read (handle, (char *)&fh, sizeof (fh)) != sizeof (fh)) {
 filetype_error:
-	    close (handle);
-	    err ("Such a file is not handled.\n");
+		close (handle);
+		err ("Such a file is not handled.\n");
 	}
 	Head.head = fh.head;
 	Head.reserve2 = fh.reserve2;
@@ -316,19 +316,19 @@ filetype_error:
 	Head.base = (address)fh.base;
 	Head.exec = (address)fh.exec;
 #endif
-    }
+	}
 #endif	/* OSKDIS */
 
-    bytes = Head.text + Head.data + Head.offset + Head.symbol;
-    top = (address) Malloc (bytes + 16);
+	bytes = Head.text + Head.data + Head.offset + Head.symbol;
+	top = (address) Malloc (bytes + 16);
 
-    if (read (handle, (char*)top, bytes) != bytes) {
+	if (read (handle, (char*)top, bytes) != bytes) {
 	close (handle);
 	err ("The file size is abnormal.\n");
-    }
+	}
 
-    close (handle);
-    return top;
+	close (handle);
+	return top;
 }
 
 /*
@@ -339,81 +339,81 @@ filetype_error:
 extern void
 free_load_buffer (void)
 {
-    Mfree ((void *) Top);
+	Mfree ((void *) Top);
 }
 
 
 int
 main (int argc, char* argv[])
 {
-    time_t start_time = time (NULL);
+	time_t start_time = time (NULL);
 
 #ifdef	OSK
-    setbuf (stdout, NULL);
+	setbuf (stdout, NULL);
 #endif
-    setbuf (stderr, NULL);
+	setbuf (stderr, NULL);
 
-    analyze_args (argc, argv);
-    print_title ();
+	analyze_args (argc, argv);
+	print_title ();
 
-    eprintf ("Loading %s.\n", Filename_in);
+	eprintf ("Loading %s.\n", Filename_in);
 
-    /* アドレス関係の大域変数を初期化 */
-    Top = (ULONG)loadfile (Filename_in);
-    Ofst = Top - (ULONG)Head.base;
-    BeginTEXT = Head.base;
+	/* アドレス関係の大域変数を初期化 */
+	Top = (ULONG)loadfile (Filename_in);
+	Ofst = Top - (ULONG)Head.base;
+	BeginTEXT = Head.base;
 
 #ifdef	OSKDIS
-    BeginBSS  = BeginTEXT + Head.text;
-    BeginDATA = BeginBSS  + Head.bss;
-    Last      = BeginDATA + Head.data;
-    Available_text_end = BeginBSS;
+	BeginBSS  = BeginTEXT + Head.text;
+	BeginDATA = BeginBSS  + Head.bss;
+	Last      = BeginDATA + Head.data;
+	Available_text_end = BeginBSS;
 
 #else
-    BeginDATA = BeginTEXT + Head.text;
-    BeginBSS  = BeginDATA + Head.data;
-    Last = BeginSTACK = BeginBSS  + Head.bss;
-    Available_text_end = (option_D ? BeginBSS : BeginDATA);
+	BeginDATA = BeginTEXT + Head.text;
+	BeginBSS  = BeginDATA + Head.data;
+	Last = BeginSTACK = BeginBSS  + Head.bss;
+	Available_text_end = (option_D ? BeginBSS : BeginDATA);
 
-    if (Head.bindinfo) {
+	if (Head.bindinfo) {
 	eprintf ("This file is bound.\n"
 		 "Please unbind and generate source.\n");
 	return 1;
-    }
+	}
 #endif	/* OSKDIS */
 
 
-    load_OS_sym();
-    init_labelbuf();
-    init_symtable();
+	load_OS_sym();
+	init_labelbuf();
+	init_symtable();
 
 
-    /* 対象 MPU/MMU/FPU の表示 */
-    {
+	/* 対象 MPU/MMU/FPU の表示 */
+	{
 	static const target_table mpu_table[] = {
-	    { M000, "68000" },
-	    { M010, "68010" },
-	    { M020, "68020" },
-	    { M030, "68030" },
-	    { M040, "68040" },
-	    { M060, "68060" },
-	    { MISP, "060ISP" }
+		{ M000, "68000" },
+		{ M010, "68010" },
+		{ M020, "68020" },
+		{ M030, "68030" },
+		{ M040, "68040" },
+		{ M060, "68060" },
+		{ MISP, "060ISP" }
 	};
 
 	static const target_table mmu_table[] = {
-	    { MMU851, "68851" },
-	    { MMU030, "68030" },
-	    { MMU040, "68040" },
-	    { MMU060, "68060" }
+		{ MMU851, "68851" },
+		{ MMU030, "68030" },
+		{ MMU040, "68040" },
+		{ MMU060, "68060" }
 	};
 
 	static const target_table fpu_table[] = {
-	    { F881, "68881" },
-	    { F882, "68882" },
-	    { F040, "68040" },
-	    { F4SP, "040FPSP" },
-	    { F060, "68060" },
-	    { F6SP, "060FPSP" }
+		{ F881, "68881" },
+		{ F882, "68882" },
+		{ F040, "68040" },
+		{ F4SP, "040FPSP" },
+		{ F060, "68060" },
+		{ F6SP, "060FPSP" }
 	};
 
 	print_target ("Target MPU: ", MPU_types,
@@ -424,59 +424,59 @@ main (int argc, char* argv[])
 
 	print_target ("Target FPU: ", FPCP_type,
 		fpu_table, (sizeof fpu_table / sizeof fpu_table[0]));
-    }
+	}
 
 
 #ifndef OSKDIS
-    eprintf ("Deploy relocate information.\n");
-    make_relocate_table ();
+	eprintf ("Deploy relocate information.\n");
+	make_relocate_table ();
 #endif	/* !OSKDIS */
 
 
-    while (check_exist_output_file (Filename_out))
+	while (check_exist_output_file (Filename_out))
 	change_filename (&Filename_out, "source");
 
-    if (option_e)
+	if (option_e)
 	while (check_exist_output_file (Labelfilename_out))
-	    change_filename (&Labelfilename_out, "label");
+		change_filename (&Labelfilename_out, "label");
 
-    check_open_output_file (Filename_out);
+	check_open_output_file (Filename_out);
 
-    if (option_g) {
+	if (option_g) {
 	eprintf ("Label file is being loaded.\n");
 	read_labelfile (Labelfilename_in);
-    }
-    if (option_e)
+	}
+	if (option_e)
 	check_open_output_file (Labelfilename_out);
-    if (option_T) {
+	if (option_T) {
 	eprintf ("Loading table description file.\n");
 	read_tablefile (Tablefilename);
-    }
+	}
 
 #ifndef OSKDIS
-    if (Head.symbol) {
+	if (Head.symbol) {
 	eprintf ("Expand the symbol table.\n");
 	make_symtable ();
-    } else
+	} else
 	eprintf ("Unfortunately the symbol table does not exist.\n");
 #endif
 
-    Exist_symbol = is_exist_symbol ();
+	Exist_symbol = is_exist_symbol ();
 
-    analyze_and_generate (argc, argv);
+	analyze_and_generate (argc, argv);
 
-    eprintf ("\nFinished.\n");
-    free_labelbuf ();
-    free_relocate_buffer ();
-    free_symbuf ();
-    free_load_buffer ();
+	eprintf ("\nFinished.\n");
+	free_labelbuf ();
+	free_relocate_buffer ();
+	free_symbuf ();
+	free_load_buffer ();
 
-    {
+	{
 	time_t finish_time = time (NULL);
 	eprintf ("Time required: %ds\n", (int) difftime (finish_time, start_time));
-    }
+	}
 
-    return 0;
+	return 0;
 }
 
 
@@ -490,11 +490,11 @@ main (int argc, char* argv[])
 private void
 analyze_device (void)
 {
-    ULONG ad = 0;
+	ULONG ad = 0;
 
-    Reason_verbose = (Verbose >= 1) ? TRUE : FALSE;
+	Reason_verbose = (Verbose >= 1) ? TRUE : FALSE;
 
-    do {
+	do {
 	regist_label (Head.base + ad       , DATLABEL | LONGSIZE | FORCE);
 	regist_label (Head.base + ad + 4   , DATLABEL | WORDSIZE | FORCE | HIDDEN);
 #if 0
@@ -507,7 +507,7 @@ analyze_device (void)
 	analyze (*(address*) (Ofst + ad + 6  ), ANALYZE_IGNOREFAULT);
 	analyze (*(address*) (Ofst + ad + 0xa), ANALYZE_IGNOREFAULT);
 	ad = *(ULONG*) (ad + Ofst);
-    } while (((long)ad & 1) == 0
+	} while (((long)ad & 1) == 0
 #if 0
 		&& (ad != (address)-1)		/* 不要 */
 #endif
@@ -525,25 +525,25 @@ private void
 analyze_and_generate (int argc, char* argv[])
 {
 
-    if (option_v) {
+	if (option_v) {
 	eprintf ("Output disassemble list.\n");
 	disasmlist (Filename_in, Filename_out, Filedate);
 	return;
-    }
+	}
 
-    Disasm_String = FALSE;  /* 解析中はニーモニックは不要 */
+	Disasm_String = FALSE;  /* 解析中はニーモニックは不要 */
 
-    if (!option_g) {
+	if (!option_g) {
 
 #ifdef	OSKDIS
 	switch (HeadOSK.type & 0x0f00) {
-	    case 0x0100:	/* Program */
-	    case 0x0b00:	/* Trap */
+		case 0x0100:	/* Program */
+		case 0x0b00:	/* Trap */
 		eprintf ("\n初期化データ領域解析中です.");
 		analyze_idata ();	/* 初期データオフセットを解析   */
 		analyze_irefs ();	/* 初期データ参照テーブルを解析 */
 		eputc ('\n');
-	    default:
+		default:
 		break;
 	}
 	regist_label (Head.base + Head.text + Head.data + Head.bss, DATLABEL | UNKNOWN);
@@ -564,24 +564,24 @@ analyze_and_generate (int argc, char* argv[])
 
 #ifdef	OSKDIS
 	switch (HeadOSK.type & 0x0f00) {
-	    case 0x0b00:	/* Trap */
+		case 0x0b00:	/* Trap */
 		regist_label (HeadOSK.init, PROLABEL | WORDSIZE | FORCE);
 		regist_label (HeadOSK.term, PROLABEL | WORDSIZE | FORCE);
 		z_table(0x000048);
-	    case 0x0100:	/* Program */
+		case 0x0100:	/* Program */
 #if 1	/* デバッグの為のコード */
 		regist_label (HeadOSK.idata, DATLABEL | LONGSIZE | FORCE);
 		regist_label (HeadOSK.irefs, DATLABEL | WORDSIZE | FORCE);
 #endif
 		break;
-	    case 0x0200:	/* Subroutine */
-	    case 0x0c00:	/* System */
+		case 0x0200:	/* Subroutine */
+		case 0x0c00:	/* System */
 		break;
-	    case 0x0d00:	/* FileMan */
+		case 0x0d00:	/* FileMan */
 		regist_label (HeadOSK.exec + 0, DATLABEL | WORDSIZE | FORCE);
 		relative_table (HeadOSK.exec);
 		break;
-	    case 0x0e00:
+		case 0x0e00:
 		regist_label (HeadOSK.exec + 0, DATLABEL | WORDSIZE | FORCE);
 		w_table (HeadOSK.exec);
 		break;
@@ -595,55 +595,55 @@ analyze_and_generate (int argc, char* argv[])
 
 #else	/* !OSKDIS */
 	if (option_d) {
-	    analyze_device ();
-	    if (Head.exec != Head.base)
+		analyze_device ();
+		if (Head.exec != Head.base)
 		analyze (Head.exec, option_i ? ANALYZE_IGNOREFAULT : ANALYZE_NORMAL);
 	} else
-	    analyze (Head.exec, ANALYZE_IGNOREFAULT);
+		analyze (Head.exec, ANALYZE_IGNOREFAULT);
 #endif	/* OSKDIS */
-    }
+	}
 
-    Reason_verbose = (Verbose == 2) ? TRUE : FALSE;
-    eprintf ("\nData area analysis in progress.");
-    analyze_data ();
+	Reason_verbose = (Verbose == 2) ? TRUE : FALSE;
+	eprintf ("\nData area analysis in progress.");
+	analyze_data ();
 
 #if 0
-    if (!option_g) {
+	if (!option_g) {
 	eprintf ("\nアドレステーブルから捜しています.");
 	search_adrs_table ();
-    }
+	}
 #endif
 
-    if (!option_p)
+	if (!option_p)
 	do
-	    eprintf ("\nI am searching the program area from the data area (1).");
+		eprintf ("\nI am searching the program area from the data area (1).");
 	while (research_data () && !option_l);
 
-    if (String_length_min)
+	if (String_length_min)
 	do {
-	    eprintf ("\nI am looking for a string.");
-	    if (!search_string (String_length_min) || option_p)
+		eprintf ("\nI am looking for a string.");
+		if (!search_string (String_length_min) || option_p)
 		break;
-	    eprintf ("\nI am searching the program area from the data area (2).");
-	    if (!research_data ())
+		eprintf ("\nI am searching the program area from the data area (2).");
+		if (!research_data ())
 		break;
-	    do
+		do
 		eprintf ("\nI am looking for a program area from the data area.");
-	    while (research_data () && !option_l);
+		while (research_data () && !option_l);
 	} while (!option_l);
 
-    if (!option_c) {
+	if (!option_c) {
 	eprintf ("\nLabel is being checked.");
 	search_operand_label ();
-    }
+	}
 
-    if (option_e) {
+	if (option_e) {
 	eprintf ("Label file is being created.\n");
 	make_labelfile (Filename_in, Labelfilename_out);
-    }
+	}
 
-    eprintf ("The source is being created.");
-    generate (Filename_in, Filename_out, Filedate, argc, argv);
+	eprintf ("The source is being created.");
+	generate (Filename_in, Filename_out, Filedate, argc, argv);
 }
 
 
@@ -658,60 +658,60 @@ analyze_and_generate (int argc, char* argv[])
 private int
 check_exist_output_file (char* filename)
 {
-    FILE* fp;
+	FILE* fp;
 
-    /* --overwrite 指定時は無条件に上書き. */
-    if (option_overwrite)
+	/* --overwrite 指定時は無条件に上書き. */
+	if (option_overwrite)
 	return 0;
 
-    /* 標準出力に出力するなら検査不要. */
-    if (strcmp ("-", filename) == 0)
+	/* 標準出力に出力するなら検査不要. */
+	if (strcmp ("-", filename) == 0)
 	return 0;
 
-    /* ファイルが存在しなければOK. */
-    if ((fp = fopen (filename, "r")) == NULL)
+	/* ファイルが存在しなければOK. */
+	if ((fp = fopen (filename, "r")) == NULL)
 	return 0;
 
-    /* 端末デバイスへの出力ならOK. */
-    if (isatty (fileno (fp))) {
+	/* 端末デバイスへの出力ならOK. */
+	if (isatty (fileno (fp))) {
 	fclose (fp);
 	return 0;
-    }
+	}
 
-    /* いずれでもなければキー入力. */
-    fclose (fp);
+	/* いずれでもなければキー入力. */
+	fclose (fp);
 
 #ifdef	QUICK_YES_NO	/* version 2.79 互換 */
-    {
+	{
 	int key;
 	eprintf ("%s が既に存在します.\n"
 		 "Over Write ( Y or N )? ", filename);
 	do
-	    key = toupper (getch ());
+		key = toupper (getch ());
 	while (key != 'Y' && key != 'N');
 	eprintf ("%c\n", key);
 	if (key == 'Y')
-	    return 0;
-    }
+		return 0;
+	}
 #else			/* 安全の為 "yes" を入力させる. */
-    {
+	{
 	char buf[256];
 	eprintf ("%s が既に存在します.\n"
 		 "上書きしますか？(Yes/No/Rename): ", filename);
 
 	if (fgets (buf, sizeof buf, stdin)) {
-	    /* y, yes なら上書き */
-	    if (strcasecmp (buf, "y\n") == 0 || strcasecmp (buf, "yes\n") == 0)
+		/* y, yes なら上書き */
+		if (strcasecmp (buf, "y\n") == 0 || strcasecmp (buf, "yes\n") == 0)
 		return 0;
-	    /* r, rename ならファイル名変更 */
-	    if (strcasecmp (buf, "r\n") == 0 || strcasecmp (buf, "rename\n") == 0)
+		/* r, rename ならファイル名変更 */
+		if (strcasecmp (buf, "r\n") == 0 || strcasecmp (buf, "rename\n") == 0)
 		return 1;
 	}
-    }
+	}
 #endif	/* QUICK_YES_NO */
 
-    /* 上書きしないならプログラム終了. */
-    exit (1);
+	/* 上書きしないならプログラム終了. */
+	exit (1);
 }
 
 
@@ -723,19 +723,19 @@ check_exist_output_file (char* filename)
 private void
 change_filename (char** nameptr, const char* file)
 {
-    char buf[PATH_MAX + 1];
-    int len;
+	char buf[PATH_MAX + 1];
+	int len;
 
-    eprintf ("Input %s filename:", file);
+	eprintf ("Input %s filename:", file);
 #if 0
-    fflush (stderr);
+	fflush (stderr);
 #endif
-    if (fgets (buf, sizeof buf, stdin) && (len = strlen (buf)) > 1) {
+	if (fgets (buf, sizeof buf, stdin) && (len = strlen (buf)) > 1) {
 	buf[len - 1] = '\0';
 	*nameptr = strcpy (Malloc (len), buf);
 	return;
-    }
-    exit (1);
+	}
+	exit (1);
 }
 
 
@@ -747,24 +747,24 @@ change_filename (char** nameptr, const char* file)
 private void
 check_open_output_file (char* filename)
 {
-    int fd;
+	int fd;
 
-    if (!strcmp ("-", filename))
+	if (!strcmp ("-", filename))
 	return;
 
 #ifdef	OSK
-    if ((fd = open (filename, S_IREAD)) < 0)
+	if ((fd = open (filename, S_IREAD)) < 0)
 #else
-    if ((fd = open (filename, O_RDONLY)) < 0)
+	if ((fd = open (filename, O_RDONLY)) < 0)
 #endif	/* OSK */
 	return;
 
-    if (isatty (fd)) {
+	if (isatty (fd)) {
 	close (fd);
 	return;
-    }
-    close (fd);
-    if (access (filename, R_OK | W_OK) < 0)
+	}
+	close (fd);
+	if (access (filename, R_OK | W_OK) < 0)
 	err ("%s にアクセスできません(!)\n", filename);
 }
 

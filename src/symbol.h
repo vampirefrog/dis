@@ -13,14 +13,14 @@
 
 
 typedef struct _symlist {
-    struct _symlist* next;
-    UWORD  type;
-    char*  sym;
+	struct _symlist* next;
+	UWORD  type;
+	char*  sym;
 } symlist;
 
 typedef struct {
-    address adrs;
-    symlist first;
+	address adrs;
+	symlist first;
 } symbol;
 
 

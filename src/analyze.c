@@ -54,32 +54,32 @@ private void	unregist_data (operand*);
 static INLINE address
 skip_depend_ea (address neardepend, disasm* code, operand* op)
 {
-    switch (op->ea) {
+	switch (op->ea) {
 	case AbLong:
-	    if (neardepend == op->eaadrs)
+		if (neardepend == op->eaadrs)
 		neardepend = nearadrs (neardepend + 1);
-	    break;
+		break;
 	case IMMED:
-	    if (neardepend == op->eaadrs && code->size == LONGSIZE)
+		if (neardepend == op->eaadrs && code->size == LONGSIZE)
 		neardepend = nearadrs (neardepend + 1);
-	    break;
+		break;
 	case AregIDXB:
-	    if (neardepend == op->eaadrs && op->exbd == 4)
+		if (neardepend == op->eaadrs && op->exbd == 4)
 		neardepend = nearadrs (neardepend + 1);
-	    break;
+		break;
 	case AregPOSTIDX:
 	case AregPREIDX:
-	    if (neardepend == op->eaadrs && op->exbd == 4)
+		if (neardepend == op->eaadrs && op->exbd == 4)
 		neardepend = nearadrs (neardepend + 1);
 	case PCPOSTIDX:
 	case PCPREIDX:
-	    if (neardepend == op->eaadrs2 && op->exod == 4)
+		if (neardepend == op->eaadrs2 && op->exod == 4)
 		neardepend = nearadrs (neardepend + 1);
-	    break;
+		break;
 	default:
-	    break;
-    }
-    return neardepend;
+		break;
+	}
+	return neardepend;
 }
 
 /*
@@ -90,19 +90,19 @@ skip_depend_ea (address neardepend, disasm* code, operand* op)
 static INLINE boolean
 right_opecode (address neardepend, disasm* code, address pc)
 {
-    if (pc <= neardepend)
+	if (pc <= neardepend)
 	return TRUE;
 
-    neardepend = skip_depend_ea (neardepend, code, &code->op1);
-    neardepend = skip_depend_ea (neardepend, code, &code->op2);
-    neardepend = skip_depend_ea (neardepend, code, &code->op3);
-    neardepend = skip_depend_ea (neardepend, code, &code->op4);
+	neardepend = skip_depend_ea (neardepend, code, &code->op1);
+	neardepend = skip_depend_ea (neardepend, code, &code->op2);
+	neardepend = skip_depend_ea (neardepend, code, &code->op3);
+	neardepend = skip_depend_ea (neardepend, code, &code->op4);
 
 #ifdef DEBUG
-    if (pc > neardepend && (Debug & BREASON))
+	if (pc > neardepend && (Debug & BREASON))
 	printf ("right opecode failed\n");
 #endif
-    return (pc <= neardepend);
+	return (pc <= neardepend);
 }
 
 
@@ -114,11 +114,11 @@ right_opecode (address neardepend, disasm* code, address pc)
 static INLINE boolean
 datlabel (address adrs)
 {
-    lblbuf* ptr = search_label (adrs);
+	lblbuf* ptr = search_label (adrs);
 
-    if (ptr && isDATLABEL (ptr->mode))
+	if (ptr && isDATLABEL (ptr->mode))
 	return TRUE;
-    return FALSE;
+	return FALSE;
 }
 
 
@@ -127,13 +127,13 @@ datlabel (address adrs)
   解析する
 
   input:
-    start : analyze start address
-    mode  : ANALYZE_IGNOREFAULT
-	    分岐先での未定義命令等を無視する
-	    ANALYZE_NORMAL
-	    分岐先で未定義命令等を見付けたら、呼び出し側はデータ領域
+	start : analyze start address
+	mode  : ANALYZE_IGNOREFAULT
+		分岐先での未定義命令等を無視する
+		ANALYZE_NORMAL
+		分岐先で未定義命令等を見付けたら、呼び出し側はデータ領域
   return:
-    FALSE : pc からはプログラム領域と認められなかった
+	FALSE : pc からはプログラム領域と認められなかった
 
 */
 #define TRUEret		goto trueret
@@ -143,106 +143,106 @@ datlabel (address adrs)
 extern boolean
 analyze (address start, analyze_mode mode)
 {
-    address	pc = start, store = start + Ofst;
-    address	limit;
-    address	neardepend;
-    disasm	code;
-    int		orib;			/* ori.b #??,d0 = $0000???? */
+	address	pc = start, store = start + Ofst;
+	address	limit;
+	address	neardepend;
+	disasm	code;
+	int		orib;			/* ori.b #??,d0 = $0000???? */
 
 #ifdef DEBUG
-    if (Debug & (BDEBUG | BREASON))
+	if (Debug & (BDEBUG | BREASON))
 	printf ("an %x(%d)\n", start, mode);
 #endif
-    charout ('>');
+	charout ('>');
 
-    if (Available_text_end <= pc) {
+	if (Available_text_end <= pc) {
 	if (Reason_verbose)
-	    eprintf ("\n%06x : The PC is out of a valid section\t", pc);
+		eprintf ("\n%06x : The PC is out of a valid section\t", pc);
 	FALSEret;
-    } else if (depend_address (pc) || depend_address (pc - 2)) {
+	} else if (depend_address (pc) || depend_address (pc - 2)) {
 	if (Reason_verbose)
-	    eprintf ("\n%06x : PC is dependent on address\t", pc);
+		eprintf ("\n%06x : PC is dependent on address\t", pc);
 	FALSEret;
-    } else if ((ULONG)pc & 1) {
+	} else if ((ULONG)pc & 1) {
 	if (Reason_verbose)
-	    eprintf ("\n%06x : If PC is odd\t", pc);
+		eprintf ("\n%06x : If PC is odd\t", pc);
 	FALSEret;
-    } else if (((ULONG)pc & 1) != 0 || *(LONG*)store == 0) {
+	} else if (((ULONG)pc & 1) != 0 || *(LONG*)store == 0) {
 	if (Reason_verbose)
-	    eprintf ("\n%06x : The PC starts with ori.b #0,d0\t", pc);
+		eprintf ("\n%06x : The PC starts with ori.b #0,d0\t", pc);
 	FALSEret;
-    }
+	}
 
-    /* the follow 4 lines are omitable, maybe */
+	/* the follow 4 lines are omitable, maybe */
 #if 0
-    if (prolabel (start)) {
+	if (prolabel (start)) {
 	regist_label (start, PROLABEL);
 	TRUEret;
-    }
+	}
 #endif
 
-    if (!regist_label (start, PROLABEL)) {	/* これは ch_lblmod では駄目 */
+	if (!regist_label (start, PROLABEL)) {	/* これは ch_lblmod では駄目 */
 #ifdef DEBUG
 	if (Debug & BDEBUG)
-	    printf ("%x cannot be prolabel\n", pc);
+		printf ("%x cannot be prolabel\n", pc);
 #endif
 	TRUEret;
-    }
+	}
 
-    /* スタックチェック */
+	/* スタックチェック */
 #ifdef __HUMAN68K__
-    {
+	{
 	register void* sp __asm ("sp");
 
 	if (sp < _SSTA) {
-	    eputc ('\n');
-	    _stack_over ();
+		eputc ('\n');
+		_stack_over ();
 	}
-    }
+	}
 #endif
 
-    PCEND = Available_text_end;
-    orib = 0;
-    limit = limitadrs (pc);
-    neardepend = nearadrs (pc);
+	PCEND = Available_text_end;
+	orib = 0;
+	limit = limitadrs (pc);
+	neardepend = nearadrs (pc);
 
-    while (1) {
+	while (1) {
 	address previous_opval, previous_pc;
 
 	if (neardepend == pc) {				/* アドレス依存チェック */
-	    not_program (start, (address) min((ULONG) pc, (ULONG) limit));
-	    if (Reason_verbose)
+		not_program (start, (address) min((ULONG) pc, (ULONG) limit));
+		if (Reason_verbose)
 		eprintf ("\n%06x : PC is dependent on address\t", pc);
-	    FALSEret;
+		FALSEret;
 	}
 
 	if (*(UWORD*)store == 0) {			/* ori.b #??,d0 チェック */
-	    if (orib >= 2 || *(UWORD*)(store + 2) == 0) {
+		if (orib >= 2 || *(UWORD*)(store + 2) == 0) {
 		not_program (start, (address) min ((ULONG) pc, (ULONG) limit));
 		if (Reason_verbose)
-		    eprintf ((orib >= 2) ? "\n%06x : ori.b #??,d0 are consecutive\t"
+			eprintf ((orib >= 2) ? "\n%06x : ori.b #??,d0 are consecutive\t"
 					 : "\n%06x : I found ori.b #0,d0\t", pc);
 		FALSEret;
-	    }
-	    orib++;
+		}
+		orib++;
 	} else
-	    orib = 0;
+		orib = 0;
 
 	if (limit == pc && prolabel (limit)) {	/* 既に解析済みの領域とぶつかった？ */
 #ifdef DEBUG
-	    if (Debug & BDEBUG)
+		if (Debug & BDEBUG)
 		printf ("Already\n");
 #endif
-	    ROUTINE_END (pc);
-	    TRUEret;
+		ROUTINE_END (pc);
+		TRUEret;
 	}
 
 	if ((pc > limit) ||	/* 最初は code.op.opval は初期化されないけど大丈夫 */
-	    (pc <= code.op1.opval && code.op1.opval < limit) ||
-	    (pc <= code.op2.opval && code.op2.opval < limit) ||
-	    (pc <= code.op3.opval && code.op3.opval < limit) ||
-	    (pc <= code.op4.opval && code.op4.opval < limit))
-	    limit = limitadrs (pc);
+		(pc <= code.op1.opval && code.op1.opval < limit) ||
+		(pc <= code.op2.opval && code.op2.opval < limit) ||
+		(pc <= code.op3.opval && code.op3.opval < limit) ||
+		(pc <= code.op4.opval && code.op4.opval < limit))
+		limit = limitadrs (pc);
 
 	previous_opval = code.op1.ea == PCIDX ? code.op1.opval : (address) -1;
 	previous_pc = pc;
@@ -250,34 +250,34 @@ analyze (address start, analyze_mode mode)
 
 #ifdef DEBUG
 	if (Debug & BTRACE) {
-	    static const char size[10][2] = {
+		static const char size[10][2] = {
 		".b", ".w", ".l", ".q", ".s", ".s", ".d", ".x", ".p", ""
-	    };
+		};
 
-	    printf ("%05x:%05x\t%s.2%s",
+		printf ("%05x:%05x\t%s.2%s",
 			previous_pc, limit, code.opecode, size[code.size]);
-	    if (code.op1.operand[0])
+		if (code.op1.operand[0])
 		printf ("\t%s", code.op1.operand);
-	    if (code.op2.operand[0])
+		if (code.op2.operand[0])
 		printf (",%s", code.op2.operand);
-	    if (code.op3.operand[0])
+		if (code.op3.operand[0])
 		printf (",%s", code.op3.operand);
-	    if (code.op4.operand[0])
+		if (code.op4.operand[0])
 		printf (",%s", code.op4.operand);
-	    printf ("\n");
+		printf ("\n");
 	}
 #endif
 	/* add '90 Sep 24 */
 	if (Available_text_end < pc) {
-	    if (Reason_verbose)
+		if (Reason_verbose)
 		eprintf ("\n%06x : PC が有効なセクションを外れた\t", pc);
-	    not_program (start, (address) min ((ULONG) previous_pc, (ULONG) limit));
-	    FALSEret;
+		not_program (start, (address) min ((ULONG) previous_pc, (ULONG) limit));
+		FALSEret;
 	}
 
 	if (neardepend < pc) {
 #ifdef DEBUG
-	    if (Debug & BDEBUG) {
+		if (Debug & BDEBUG) {
 		printf ("over neardepend:%x\n", pc);
 		printf ("size %d ea1 %d ea2 %d ea3 %d ea4 %d"
 			"op1val %x op2val %x op3val %x op4val %x"
@@ -287,86 +287,86 @@ analyze (address start, analyze_mode mode)
 			code.op1.opval, code.op2.opval, code.op3.opval, code.op4.opval,
 			code.op1.eaadrs, code.op2.eaadrs, code.op3.eaadrs, code.op4.eaadrs
 			);
-	    }
+		}
 #endif
-	    if (right_opecode (neardepend, &code, pc))
+		if (right_opecode (neardepend, &code, pc))
 		neardepend = nearadrs (pc);
-	    else {
+		else {
 		if (Reason_verbose)
-		    eprintf ("\n%06x : アドレス依存のオペランドが正当でない\t", previous_pc);
+			eprintf ("\n%06x : アドレス依存のオペランドが正当でない\t", previous_pc);
 		not_program (start, (address) min ((ULONG) previous_pc, (ULONG) limit));
 		FALSEret;
-	    }
+		}
 	}
 
 	if (code.flag == OTHER
 	 || ((code.flag == JMPOP || code.flag == JSROP)
 		&& AregPOSTIDX <= code.jmpea && code.jmpea != PCIDXB)) {
-	    regist_data (&code, &code.op1);
-	    regist_data (&code, &code.op2);
-	    regist_data (&code, &code.op3);
-	    regist_data (&code, &code.op4);
+		regist_data (&code, &code.op1);
+		regist_data (&code, &code.op2);
+		regist_data (&code, &code.op3);
+		regist_data (&code, &code.op4);
 	}
 
 	switch (code.flag) {
 	case UNDEF:
-	    if (Reason_verbose)
+		if (Reason_verbose)
 		eprintf ("\n%06x : 未定義命令(%04x %04x)\t", previous_pc,
 			peekw (previous_pc + Ofst), peekw (previous_pc + Ofst + 2));
-	    not_program (start, (address) min((ULONG) previous_pc, (ULONG) limit));
-	    FALSEret;
+		not_program (start, (address) min((ULONG) previous_pc, (ULONG) limit));
+		FALSEret;
 	case OTHER:
-	    break;
+		break;
 	case JMPOP:
-	    if (!(code.jmp == (address) -1 ||
+		if (!(code.jmp == (address) -1 ||
 		  (code.op1.ea == AbLong && !INPROG (code.jmp, code.op1.eaadrs)) ||
 		   code.op1.ea == AbShort ||
 		   AregIDXB <= code.op1.ea)) {
 		if (code.op1.ea == PCIDX)
-		    pcix (code.jmp, previous_opval);
+			pcix (code.jmp, previous_opval);
 		else
-		    if (!branch_job (code.jmp, start, pc, previous_pc, mode, limit))
+			if (!branch_job (code.jmp, start, pc, previous_pc, mode, limit))
 			FALSEret;
-	    }
+		}
 	case RTSOP:
-	    ROUTINE_END (pc);
-	    TRUEret;
+		ROUTINE_END (pc);
+		TRUEret;
 	case JSROP:
-	    if (!(code.jmp == (address) -1 ||
+		if (!(code.jmp == (address) -1 ||
 		  (code.op1.ea == AbLong && !INPROG (code.jmp, code.op1.eaadrs)) ||
 		   code.op1.ea == AbShort ||
 		   (AregIDXB < code.op1.ea && code.op1.ea != PCIDXB))) {
 		if (code.op1.ea == PCIDX)
-		    pcix (code.jmp, previous_opval);
+			pcix (code.jmp, previous_opval);
 		else
-		    if (!branch_job (code.jmp, start, pc, previous_pc, mode, limit))
+			if (!branch_job (code.jmp, start, pc, previous_pc, mode, limit))
 			FALSEret;
-	    }
+		}
 
-	    /* -G : サブルーチンコールの直後に引数を置くことを認める */
-	    if (Arg_after_call && datlabel (pc))
+		/* -G : サブルーチンコールの直後に引数を置くことを認める */
+		if (Arg_after_call && datlabel (pc))
 		TRUEret;
 
-	    break;
+		break;
 	case BCCOP:
-	    if (!branch_job (code.jmp, start, pc, previous_pc, mode, limit))
+		if (!branch_job (code.jmp, start, pc, previous_pc, mode, limit))
 		FALSEret;
-	    break;
+		break;
 	}
-    }
+	}
 
 trueret:
 #ifdef DEBUG
-    if (Debug & BDEBUG)
+	if (Debug & BDEBUG)
 	printf ("ret\n");
 #endif
-    charout ('<');
-    return TRUE;
+	charout ('<');
+	return TRUE;
 
 falseret:
-    charout ('?');
-    ch_lblmod (start, DATLABEL | UNKNOWN | FORCE);
-    return FALSE;
+	charout ('?');
+	ch_lblmod (start, DATLABEL | UNKNOWN | FORCE);
+	return FALSE;
 }
 
 
@@ -379,21 +379,21 @@ falseret:
 private address
 limitadrs (address adrs)
 {
-    lblbuf* lptr = next (adrs + 1);
+	lblbuf* lptr = next (adrs + 1);
 
 #if 0
-    if (lptr->label == adrs && isDATLABEL (lptr->mode)) {
+	if (lptr->label == adrs && isDATLABEL (lptr->mode)) {
 	ch_lblmod (adrs, PROLABEL);
 	return limitadrs (adrs + 1);		/* この +1 は何故いるのか? */
-    }
+	}
 #endif
 
 #ifdef DEBUG
-    if (Debug & BDEBUG)
+	if (Debug & BDEBUG)
 	printf ("lmt(%x)=%x\n", adrs, lptr->label);
 #endif
 
-    return (address) min ((ULONG)lptr->label, (ULONG)Available_text_end);
+	return (address) min ((ULONG)lptr->label, (ULONG)Available_text_end);
 }
 
 
@@ -405,7 +405,7 @@ limitadrs (address adrs)
 static void
 bra_to_odd (address pre_pc, address opval)
 {
-    if (Reason_verbose)
+	if (Reason_verbose)
 	eprintf ("\n%06x : 奇数アドレス(%06x)へ分岐\t", pre_pc, opval);
 }
 
@@ -413,44 +413,44 @@ private boolean
 branch_job (address opval, address start, address pc, address pre_pc,
 		analyze_mode mode, address limit)
 {
-    if (opval == (address)-1)
+	if (opval == (address)-1)
 	return TRUE;
 
-    /* 奇数アドレスへの分岐があればプログラム領域ではない */
-    if ((LONG)opval & 1) {
+	/* 奇数アドレスへの分岐があればプログラム領域ではない */
+	if ((LONG)opval & 1) {
 	if (Disasm_AddressErrorUndefined == FALSE) {
-	    /* -j: 奇数アドレスへの分岐を未定義命令と「しない」 */
+		/* -j: 奇数アドレスへの分岐を未定義命令と「しない」 */
 
-	    regist_label (opval, DATLABEL | UNKNOWN);
-	    bra_to_odd (pre_pc, opval);		/* 警告は常に出力 */
-	    return TRUE;
+		regist_label (opval, DATLABEL | UNKNOWN);
+		bra_to_odd (pre_pc, opval);		/* 警告は常に出力 */
+		return TRUE;
 	}
 	ch_lblmod (start, DATLABEL | UNKNOWN | FORCE);
 	bra_to_odd (pre_pc, opval);
 	not_program (start, (address)min ((ULONG)pre_pc, (ULONG)limit));
 	return FALSE;
-    }
+	}
 
-    /* 分岐先が既にプログラム領域と判明している */
-    if (prolabel (opval)) {
+	/* 分岐先が既にプログラム領域と判明している */
+	if (prolabel (opval)) {
 	regist_label (opval, PROLABEL);		/* to increment label count */
 	return TRUE;
-    }
+	}
 
-    /* 分岐先の領域を解析する */
-    if (!analyze (opval, mode) && mode != ANALYZE_IGNOREFAULT && !option_i) {
+	/* 分岐先の領域を解析する */
+	if (!analyze (opval, mode) && mode != ANALYZE_IGNOREFAULT && !option_i) {
 	/* 分岐先がプログラム領域でなければ、呼び出し元も同じ */
 #ifdef DEBUG
 	if(Debug & BREASON)
-	    printf ("falseret : %x falseret\n", pc);
+		printf ("falseret : %x falseret\n", pc);
 #endif
 	ch_lblmod (start, DATLABEL | UNKNOWN | FORCE);
 	not_program (start, (address)min ((ULONG)pc, (ULONG)limit));
 	return FALSE;
-    }
+	}
 
-    /* 分岐先はプログラム領域だった */
-    return TRUE;
+	/* 分岐先はプログラム領域だった */
+	return TRUE;
 }
 
 
@@ -471,13 +471,13 @@ private void
 pcix (address table, address popval)
 {
 #ifdef DEBUG
-    if (Debug & BDEBUG)
+	if (Debug & BDEBUG)
 	printf ("pcix : %x %x\n", table, popval);
 #endif
 
-    if (table == popval)
+	if (table == popval)
 	relative_table (table);
-    else
+	else
 	regist_label (table, DATLABEL | UNKNOWN);
 }
 
@@ -490,27 +490,27 @@ pcix (address table, address popval)
 extern void
 relative_table (address table)
 {
-    address ptr = table;
-    address tableend = next (table + 1)->label;
+	address ptr = table;
+	address tableend = next (table + 1)->label;
 
-    regist_label (table, DATLABEL | RELTABLE);
+	regist_label (table, DATLABEL | RELTABLE);
 
-    while (ptr < tableend) {
+	while (ptr < tableend) {
 	address label = table + (WORD) peekw (ptr + Ofst);
 
 	if (label < (address) BeginTEXT || (address) Last < label
 	 || (table <= label && label < ptr + 2)) {
-	    regist_label (ptr, DATLABEL | UNKNOWN | FORCE);	/* not rel table */
-	    break;
+		regist_label (ptr, DATLABEL | UNKNOWN | FORCE);	/* not rel table */
+		break;
 	}
 #ifdef DEBUG
 	if (Debug & BDEBUG)
-	    printf ("lbl %x\n", label);
+		printf ("lbl %x\n", label);
 #endif
 	regist_label (label, DATLABEL | UNKNOWN);
 	ptr += 2;
 	tableend = next (ptr)->label;
-    }
+	}
 }
 
 
@@ -522,23 +522,23 @@ relative_table (address table)
 extern void
 relative_longtable (address table)
 {
-    address ptr = table;
-    address tableend = next (table + 1)->label;
+	address ptr = table;
+	address tableend = next (table + 1)->label;
 
-    regist_label (table, DATLABEL | RELLONGTABLE);
+	regist_label (table, DATLABEL | RELLONGTABLE);
 
-    while (ptr < tableend) {
+	while (ptr < tableend) {
 	address label = table + (LONG) peekl (ptr + Ofst);
 
 	if (label < (address) BeginTEXT || (address) Last < label
 	 || (table <= label && label < ptr + 4)) {
-	    regist_label (ptr, DATLABEL | UNKNOWN | FORCE);	/* not rel table */
-	    break;
+		regist_label (ptr, DATLABEL | UNKNOWN | FORCE);	/* not rel table */
+		break;
 	}
 	regist_label (label, DATLABEL | UNKNOWN);
 	ptr += 4;
 	tableend = next (ptr)->label;
-    }
+	}
 }
 
 
@@ -551,22 +551,22 @@ relative_longtable (address table)
 extern void
 w_table (address table)
 {
-    address ptr = table;
-    address tableend = next (table + 1)->label;
+	address ptr = table;
+	address tableend = next (table + 1)->label;
 
-    regist_label (table, DATLABEL | WTABLE);
+	regist_label (table, DATLABEL | WTABLE);
 
-    while (ptr < tableend) {
+	while (ptr < tableend) {
 	address label = (WORD) peekw (ptr + Ofst);
 
 #ifdef DEBUG
 	if (Debug & BDEBUG)
-	    printf ("wlbl %x\n", label);
+		printf ("wlbl %x\n", label);
 #endif
 	regist_label (label, DATLABEL | UNKNOWN);
 	ptr += 2;
 	tableend = next (ptr)->label;
-    }
+	}
 }
 
 #endif	/* OSKDIS */
@@ -579,22 +579,22 @@ w_table (address table)
 extern void
 z_table (address table)
 {
-    address ptr = table;
-    address tableend = next (table + 1)->label;
+	address ptr = table;
+	address tableend = next (table + 1)->label;
 
-    regist_label (table, DATLABEL | ZTABLE);
+	regist_label (table, DATLABEL | ZTABLE);
 
-    while (ptr + 4 <= tableend) {
+	while (ptr + 4 <= tableend) {
 	address label = (address) peekl (ptr + Ofst);
 
 	regist_label (label, DATLABEL | UNKNOWN);
 #ifdef DEBUG
 	if (Debug & BDEBUG)
-	    printf ("zlbl %x\n", label);
+		printf ("zlbl %x\n", label);
 #endif
 	ptr += 4;
 	tableend = next (ptr)->label;
-    }
+	}
 }
 
 
@@ -606,29 +606,29 @@ z_table (address table)
 extern void
 not_program (address from, address to)
 {
-    address	store;
-    address	pcend_save = PCEND;
-    address	pc = from;
-    disasm	code;
+	address	store;
+	address	pcend_save = PCEND;
+	address	pc = from;
+	disasm	code;
 
 #ifdef DEBUG
-    if (Debug & BDEBUG)
+	if (Debug & BDEBUG)
 	printf ("\nnot_prog %x - %x\n", from, to);
 #endif
-    ch_lblmod (from, DATLABEL | UNKNOWN | FORCE);
-    store = pc + Ofst;
-    PCEND = to;
-    while (pc < to) {
+	ch_lblmod (from, DATLABEL | UNKNOWN | FORCE);
+	store = pc + Ofst;
+	PCEND = to;
+	while (pc < to) {
 	store += dis (store, &code, &pc);
 	unregist_data (&code.op1);
 	unregist_data (&code.op2);
 	unregist_data (&code.op3);
 	unregist_data (&code.op4);
-    }
-    PCEND = pcend_save;
+	}
+	PCEND = pcend_save;
 
 #ifdef DEBUG
-    if (Debug & BDEBUG)
+	if (Debug & BDEBUG)
 	printf ("end of not_prog\n");
 #endif
 }
@@ -642,11 +642,11 @@ not_program (address from, address to)
 private boolean
 prolabel (address adrs)
 {
-    lblbuf* ptr = search_label (adrs);
+	lblbuf* ptr = search_label (adrs);
 
-    if (ptr && isPROLABEL (ptr->mode))
+	if (ptr && isPROLABEL (ptr->mode))
 	return TRUE;
-    return FALSE;
+	return FALSE;
 }
 
 
@@ -659,28 +659,28 @@ private void
 regist_data (disasm* code, operand* op)
 {
 
-    if (op->opval != (address)-1) {
+	if (op->opval != (address)-1) {
 	if (op->ea == IMMED && code->size2 == LONGSIZE && INPROG (op->opval, op->eaadrs))
-	    regist_label (op->opval, DATLABEL | UNKNOWN);
+		regist_label (op->opval, DATLABEL | UNKNOWN);
 
 	else if (op->ea == PCDISP || op->ea == PCIDX || op->ea == PCIDXB
 	 || (op->ea == AbLong && INPROG (op->opval, op->eaadrs))
 	 || (op->ea == AregIDXB && INPROG (op->opval, op->eaadrs) && op->exbd == 4))
-	    regist_label (op->opval, DATLABEL | code->size2);
+		regist_label (op->opval, DATLABEL | code->size2);
 
 	else if (op->ea == PCPOSTIDX || op->ea == PCPREIDX) {
-	    if (op->exod == 4 && INPROG (op->opval2, op->eaadrs2))
+		if (op->exod == 4 && INPROG (op->opval2, op->eaadrs2))
 		regist_label (op->opval2, DATLABEL | code->size2);
-	    regist_label (op->opval, DATLABEL | (op->exbd ? LONGSIZE : code->size2));
+		regist_label (op->opval, DATLABEL | (op->exbd ? LONGSIZE : code->size2));
 	}
 
 	else if (op->ea == AregPOSTIDX || op->ea == AregPREIDX) {
-	    if (op->exbd == 4 && INPROG (op->opval, op->eaadrs))
+		if (op->exbd == 4 && INPROG (op->opval, op->eaadrs))
 		regist_label (op->opval, DATLABEL | LONGSIZE);
-	    if (op->exod == 4 && INPROG (op->opval2, op->eaadrs2))
+		if (op->exod == 4 && INPROG (op->opval2, op->eaadrs2))
 		regist_label (op->opval2, DATLABEL | code->size2);
 	}
-    }
+	}
 }
 
 
@@ -693,14 +693,14 @@ private void
 unregist_data (operand* op)
 {
 
-    if (op->opval != (address)-1 &&
+	if (op->opval != (address)-1 &&
 	(op->labelchange1
 	 || ((op->ea == AbLong || op->ea == IMMED) && INPROG (op->opval, op->eaadrs))
 	)
-    )
+	)
 	unregist_label (op->opval);
 
-    if (op->labelchange2 && INPROG (op->opval2, op->eaadrs2))
+	if (op->labelchange2 && INPROG (op->opval2, op->eaadrs2))
 	unregist_label (op->opval2);
 }
 
@@ -713,15 +713,15 @@ unregist_data (operand* op)
 extern boolean
 ch_lblmod (address pc, lblmode mode)
 {
-    lblbuf* ptr = search_label (pc);
+	lblbuf* ptr = search_label (pc);
 
-    if (regist_label (pc, mode)) {
+	if (regist_label (pc, mode)) {
 	if (ptr)
-	    unregist_label (pc);
+		unregist_label (pc);
 	return TRUE;
-    }
+	}
 
-    return FALSE;
+	return FALSE;
 }
 
 

@@ -86,9 +86,9 @@ extern ULONG	max (ULONG, ULONG);
 static INLINE unsigned short
 peekw (const void* ptr)
 {
-    const unsigned char* p = ptr;
+	const unsigned char* p = ptr;
 
-    return (p[0] << 8) + p[1];
+	return (p[0] << 8) + p[1];
 }
 #endif
 
@@ -98,9 +98,9 @@ peekw (const void* ptr)
 static INLINE unsigned long
 peekl (const void* ptr)
 {
-    const unsigned char* p = ptr;
+	const unsigned char* p = ptr;
 
-    return (p[0] << 24) + (p[1] << 16) + (p[2] << 8) + p[3];
+	return (p[0] << 24) + (p[1] << 16) + (p[2] << 8) + p[3];
 }
 #endif
 
