@@ -1,10 +1,10 @@
 /* $Id: disasm.c,v 2.76 1995/01/07 11:33:16 ryo Exp $
  *
- *	ソースコードジェネレータ
- *	逆アセンブルモジュール
- *	Copyright (C) 1989,1990 K.Abe, 1994 R.ShimiZu
- *	All rights reserved.
- *	Copyright (C) 1997-2010 Tachibana
+ *      ソースコードジェネレータ
+ *      逆アセンブルモジュール
+ *      Copyright (C) 1989,1990 K.Abe, 1994 R.ShimiZu
+ *      All rights reserved.
+ *      Copyright (C) 1997-2010 Tachibana
  *
  */
 
@@ -12,26 +12,26 @@
 
 #include "disasm.h"
 #include "estruct.h"
-#include "etc.h"				/* peek[wl] */
+#include "etc.h"                                /* peek[wl] */
 #include "fpconv.h"
 #include "global.h"
 #include "hex.h"
 
-#ifdef	OSKDIS
+#ifdef  OSKDIS
 #include "label.h"
 #endif /* OSKDIS */
 
 
-#define BYTE1	    (*(unsigned char*) ptr)
-#define BYTE2	    (*(unsigned char*) (ptr + 1))
-#define BYTE3	    (*(unsigned char*) (ptr + 2))
-#define BYTE4	    (*(unsigned char*) (ptr + 3))
-#define BYTE5	    (*(unsigned char*) (ptr + 4))
-#define BYTE6	    (*(unsigned char*) (ptr + 5))
-#define WORD1	    (peekw (ptr))
-#define WORD2	    (peekw (ptr + 2))
-#define WORD3	    (peekw (ptr + 4))
-#define LONG05	    (peekl (ptr + 2))
+#define BYTE1       (*(unsigned char*) ptr)
+#define BYTE2       (*(unsigned char*) (ptr + 1))
+#define BYTE3       (*(unsigned char*) (ptr + 2))
+#define BYTE4       (*(unsigned char*) (ptr + 3))
+#define BYTE5       (*(unsigned char*) (ptr + 4))
+#define BYTE6       (*(unsigned char*) (ptr + 5))
+#define WORD1       (peekw (ptr))
+#define WORD2       (peekw (ptr + 2))
+#define WORD3       (peekw (ptr + 4))
+#define LONG05      (peekl (ptr + 2))
 #define SignBYTE2   (*(signed char *) (ptr + 1))
 #define SignBYTE4   (*(signed char *) (ptr + 3))
 #define SignWORD2   ((WORD) peekw (ptr + 2))
@@ -39,49 +39,47 @@
 #define SignLONG05  ((LONG) peekl (ptr + 2))
 
 /*  アドレッシングモード (bitmaped)  */
-/*
-	Dn ----------------------------------------------------+
-	An ---------------------------------------------------+|
-	(An) ------------------------------------------------+||
-	(An)+ ----------------------------------------------+|||
-	-(An) ---------------------------------------------+||||
-	(d16,An) -----------------------------------------+|||||
-	(d8,An,ix) --------------------------------------+||||||
-	??? --------------------------------------------+|||||||
-	(abs).w ---------------------------------------+||||||||
-	(abs).l --------------------------------------+|||||||||
-	(d16,pc) ------------------------------------+||||||||||
-	(d8,pc,ix) ---------------------------------+|||||||||||
-	#imm --------------------------------------+||||||||||||
+/*      Dn -------------------------------------------+ */
+/*      An ------------------------------------------+| */
+/*      (An) ---------------------------------------+|| */
+/*      (An)+ -------------------------------------+||| */
+/*      -(An) ------------------------------------+|||| */
+/*      (d16,An) --------------------------------+||||| */
+/*      (d8,An,ix) -----------------------------+|||||| */
+/*      ??? -----------------------------------+||||||| */
+/*      (abs).w ------------------------------+|||||||| */
+/*      (abs).l -----------------------------+||||||||| */
+/*      (d16,pc) ---------------------------+|||||||||| */
+/*      (d8,pc,ix) ------------------------+||||||||||| */
+/*      #imm -----------------------------+|||||||||||| */
+/*                                        ||||||||||||| */
+#define DATAREG     0x00001    /*  -------------------@ */
+#define ADRREG      0x00002    /*  ------------------@- */
+#define ADRIND      0x00004    /*  -----------------@-- */
+#define POSTINC     0x00008    /*  ----------------@--- */
+#define PREDEC      0x00010    /*  ---------------@---- */
+#define DISPAREG    0x00020    /*  --------------@----- */
+#define IDXAREG     0x00040    /*  -------------@------ */
+#define ABSW        0x00100    /*  -----------@-------- */
+#define ABSL        0x00200    /*  ----------@--------- */
+#define DISPPC      0x00400    /*  ---------@---------- */
+#define IDXPC       0x00800    /*  --------@----------- */
+#define IMMEDIATE   0x01000    /*  -------@------------ */
+#define SRCCR       0x10000    /*  ---@---------------- */
+#define MOVEOPT     0x80000    /*  @------------------- */
 
-						   |||||||||||||	*/
-#define DATAREG	    0x00001		/*  -------------------@    */
-#define ADRREG	    0x00002		/*  ------------------@-    */
-#define ADRIND	    0x00004		/*  -----------------@--    */
-#define POSTINC	    0x00008		/*  ----------------@---    */
-#define PREDEC	    0x00010		/*  ---------------@----    */
-#define DISPAREG    0x00020		/*  --------------@-----    */
-#define IDXAREG	    0x00040		/*  -------------@------    */
-#define ABSW	    0x00100		/*  -----------@--------    */
-#define ABSL	    0x00200		/*  ----------@---------    */
-#define DISPPC	    0x00400		/*  ---------@----------    */
-#define IDXPC	    0x00800		/*  --------@-----------    */
-#define IMMEDIATE   0x01000		/*  -------@------------    */
-#define SRCCR	    0x10000		/*  ---@----------------    */
-#define MOVEOPT	    0x80000		/*  @-------------------    */
-
-#define CHANGE	    0x0037f		/*  ----------@@-@@@@@@@    */
-#define CTRLCHG	    0x00364		/*  ----------@@-@@--@--    */
-#define CONTROL	    0x00f64		/*  --------@@@@-@@--@--    */
-#define MEMORY	    0x01f7c		/*  -------@@@@@-@@@@@--    */
-#define DATA	    0x01f7d		/*  -------@@@@@-@@@@@-@    */
-#define ALL	    0x01f7f			/*  -------@@@@@-@@@@@@@    */
+#define CHANGE      0x0037f    /*  ----------@@-@@@@@@@ */
+#define CTRLCHG     0x00364    /*  ----------@@-@@--@-- */
+#define CONTROL     0x00f64    /*  --------@@@@-@@--@-- */
+#define MEMORY      0x01f7c    /*  -------@@@@@-@@@@@-- */
+#define DATA        0x01f7d    /*  -------@@@@@-@@@@@-@ */
+#define ALL         0x01f7f    /*  -------@@@@@-@@@@@@@ */
 
 
-#ifdef	OSKDIS
-#define	DC_WORD "dc"
+#ifdef  OSKDIS
+#define DC_WORD "dc"
 #else
-#define	DC_WORD ".dc"
+#define DC_WORD ".dc"
 #endif
 
 /* private 関数プロトタイプ */
@@ -117,7 +115,7 @@ private void setEA(disasm *, operand *, address, int);
 #ifndef OSKDIS
 char **OSlabel;
 char **FElabel;
-char **SXlabel;					/* char* [SXCALL_MAX]へのポインタ */
+char **SXlabel;                                 /* char* [SXCALL_MAX]へのポインタ */
 char OSCallName[MAX_MACRO_LEN] = "DOS";
 char FECallName[MAX_MACRO_LEN] = "FPACK";
 char SXCallName[MAX_MACRO_LEN] = "SXCALL";
@@ -151,7 +149,7 @@ boolean Disasm_SX_Window = FALSE;
 /* CPU32 命令セット対応(デフォルトで対応しない) */
 boolean Disasm_CPU32;
 
-#ifdef	COLDFIRE
+#ifdef  COLDFIRE
 /* ColdFire 命令セット対応(デフォルトで対応しない) */
 boolean Disasm_ColdFire;
 #endif
@@ -172,13 +170,13 @@ static address PC;
 address PCEND;
 
 
-#define SX_WINDOW_EXIT	0xa352
+#define SX_WINDOW_EXIT  0xa352
 
-#define DOS_EXIT	0x00
-#define DOS_EXIT2	0x4c
-#define DOS_KEEPPR	0x31
-#ifdef	DOS_KILL_PR_IS_RTSOP
-#define DOS_KILL_PR	0xf9
+#define DOS_EXIT        0x00
+#define DOS_EXIT2       0x4c
+#define DOS_KEEPPR      0x31
+#ifdef  DOS_KILL_PR_IS_RTSOP
+#define DOS_KILL_PR     0xf9
 #endif
 
 
@@ -188,10 +186,10 @@ static const int pow2[16] = {
 };
 
 
-#define IfNeedStr	if (Disasm_String)
-#define SETSIZE()	(code->size = code->size2 = (WORD1 >> 6) & 3)
-#define OPECODE(op)	do { if (Disasm_String) strcpy (code->opecode, op);} while (0)
-#define UNDEFINED()	(code->flag = UNDEF)
+#define IfNeedStr       if (Disasm_String)
+#define SETSIZE()       (code->size = code->size2 = (WORD1 >> 6) & 3)
+#define OPECODE(op)     do { if (Disasm_String) strcpy (code->opecode, op);} while (0)
+#define UNDEFINED()     (code->flag = UNDEF)
 #define REJECTBYTESIZE() \
 	do { \
 	if ((WORD1 & 0x38) == 0x8 && code->size == BYTESIZE) { \
@@ -220,7 +218,7 @@ static const int pow2[16] = {
 
 
 /* 指定MPUだけが対象なら未定義命令 */
-#define	REJECT(x) \
+#define REJECT(x) \
 (void)({ \
 	if ((MPU_types & ~(x)) == 0) { UNDEFINED(); return; } \
 	code->mputypes &= ~(x); \
@@ -292,11 +290,11 @@ extern int dis(address ptr, disasm * code, address * pcptr) {
 	code->op3.exod = -1;
 	code->op4.exod = -1;
 
-	code->op1.labelchange1 = code->op2.labelchange1 = code->op3.labelchange1 = code->op4.labelchange1 = code->op1.labelchange2 = code->op2.labelchange2 =	/* od用 */
-		code->op3.labelchange2 = code->op4.labelchange2 =	/* od用 */
+	code->op1.labelchange1 = code->op2.labelchange1 = code->op3.labelchange1 = code->op4.labelchange1 = code->op1.labelchange2 = code->op2.labelchange2 =   /* od用 */
+		code->op3.labelchange2 = code->op4.labelchange2 =       /* od用 */
 		FALSE;
 
-#ifndef __HUMAN68K__			/* Safe and Normal coding */
+#ifndef __HUMAN68K__                    /* Safe and Normal coding */
 	code->size2 = code->size = NOTHING;
 	code->default_size = WORDSIZE;
 	code->bytes = 2;
@@ -308,14 +306,14 @@ extern int dis(address ptr, disasm * code, address * pcptr) {
 	{
 		long *p = (long *)&code->size;
 
-		*(opesize *) p++ = (opesize) NOTHING;	/* size */
-		*(opesize *) p++ = (opesize) NOTHING;	/* size2 */
-		*(opesize *) p++ = (opesize) WORDSIZE;	/* default_size */
-		*(int *)p++ = (int)2;	/* bytes */
-		*(opetype *) p++ = (opetype) OTHER;	/* flag */
-		*p = (~0 << 24)			/* mputypes */
-			+(0xff << 16)		/* fpuid */
-			+(0 << 8) + 0;		/* opflags */
+		*(opesize *) p++ = (opesize) NOTHING;   /* size */
+		*(opesize *) p++ = (opesize) NOTHING;   /* size2 */
+		*(opesize *) p++ = (opesize) WORDSIZE;  /* default_size */
+		*(int *)p++ = (int)2;                   /* bytes */
+		*(opetype *) p++ = (opetype) OTHER;     /* flag */
+		*p = (~0 << 24)                         /* mputypes */
+			+(0xff << 16)                       /* fpuid */
+			+(0 << 8) + 0;                      /* opflags */
 	}
 #endif
 
@@ -353,7 +351,7 @@ extern int dis(address ptr, disasm * code, address * pcptr) {
 		code->bytes = 2;
 		code->size = code->size2 = code->default_size = WORDSIZE;
 	}
-	*pcptr += code->bytes;		/* PC += code->bytes */
+	*pcptr += code->bytes;          /* PC += code->bytes */
 
 	return code->bytes;
 }
@@ -443,7 +441,7 @@ private void setFPreglist(char *operandstr, address ptr) {
 	if(!Disasm_String)
 		return;
 
-	if((WORD1 & 0x38) == 0x20)	/* pre-decrement ?   movem とは逆!! */
+	if((WORD1 & 0x38) == 0x20)      /* pre-decrement ?   movem とは逆!! */
 		field = BYTE4;
 	else {
 		int i;
@@ -630,8 +628,8 @@ private void op00(address ptr, disasm * code) {
 			setDn(&code->op2, BYTE1 >> 1);
 			p = strstr(code->op1.operand, ".w");
 		}
-		if(p)					/* movep (0,an) が (an) に最適化  */
-			strcpy(p, p + 2);	/* される事はないので ".w" は不要 */
+		if(p)                                   /* movep (0,an) が (an) に最適化  */
+			strcpy(p, p + 2);       /* される事はないので ".w" は不要 */
 		return;
 	}
 
@@ -659,7 +657,7 @@ private void op00(address ptr, disasm * code) {
 		if(BYTE1 & 1) {
 			OPECODE(opcode01[BYTE2 >> 6]);
 			code->size = code->size2 = code->default_size = (WORD1 & 0x38) ? BYTESIZE : LONGSIZE;
-			setDn(&code->op1, BYTE1 >> 1);	/* btst 以外は可変 */
+			setDn(&code->op1, BYTE1 >> 1);  /* btst 以外は可変 */
 			setEA(code, &code->op2, ptr, (WORD1 & 0xc0) ? DATA & CHANGE : DATA);
 			return;
 		}
@@ -701,9 +699,9 @@ private void op00(address ptr, disasm * code) {
 			   /* eori か to Dn 以外なら "i" は省略可能 */
 			   && (BYTE1 == 10 || code->op2.ea != DregD)) {
 				if(code->opecode[3])
-					code->opecode[3] = '\0';	/* xxxi */
+					code->opecode[3] = '\0';        /* xxxi */
 				else
-					code->opecode[2] = '\0';	/* xxi */
+					code->opecode[2] = '\0';        /* xxi */
 
 				/* addi/subi で 1 <= imm <= 8 なら  */
 				/* imm にサイズを付ける(最適化対策) */
@@ -741,7 +739,7 @@ private void op00(address ptr, disasm * code) {
 		code->bytes = 4;
 		code->op1.ea = code->op2.ea = DregD;
 		setEA(code, &code->op3, ptr, CHANGE ^ DATAREG ^ ADRREG);
-		code->size = code->size2 = ((BYTE1 >> 1) & 3) - 1;	/* サイズ値が普通と違う */
+		code->size = code->size2 = ((BYTE1 >> 1) & 3) - 1;      /* サイズ値が普通と違う */
 		return;
 	}
 
@@ -868,8 +866,8 @@ private void moveope(address ptr, disasm * code) {
 			code->opflags += FLAG_NEED_COMMENT;
 
 			/* move.l #imm,Dn が moveq.l #imm,Dn に化けないように... */
-			if((WORD1 & 0x31ff) == 0x203c	/* move.l #imm,Dn か? */
-			   && (LONG05 < 0x80 || 0xffffff80 <= LONG05)	/* imm が範囲内か?    */
+			if((WORD1 & 0x31ff) == 0x203c   /* move.l #imm,Dn か? */
+			   && (LONG05 < 0x80 || 0xffffff80 <= LONG05)   /* imm が範囲内か?    */
 				)
 				strcat(code->op1.operand, ".l");
 		}
@@ -883,7 +881,7 @@ private void op04(address ptr, disasm * code) {
 			case 0x0000:
 				REJECT(M000 | M010);
 
-				if((UndefRegLevel & 1)	/* 未定義フィールドが 0 or Dl と同じなら正常 */
+				if((UndefRegLevel & 1)  /* 未定義フィールドが 0 or Dl と同じなら正常 */
 				   &&(WORD2 & 7) != 0 && (WORD2 & 7) != ((BYTE3 >> 4) & 7)) {
 					UNDEFINED();
 					return;
@@ -904,7 +902,7 @@ private void op04(address ptr, disasm * code) {
 			case 0x0800:
 				REJECT(M000 | M010);
 
-				if((UndefRegLevel & 1)	/* 未定義フィールドが 0 or Dl と同じなら正常 */
+				if((UndefRegLevel & 1)  /* 未定義フィールドが 0 or Dl と同じなら正常 */
 				   &&(WORD2 & 7) != 0 && (WORD2 & 7) != ((BYTE3 >> 4) & 7)) {
 					UNDEFINED();
 					return;
@@ -1017,7 +1015,7 @@ private void op04(address ptr, disasm * code) {
 			};
 
 			if(BYTE2 == 0x74)
-				REJECT(M000);	/* rtd は 68010 以降専用 */
+				REJECT(M000);   /* rtd は 68010 以降専用 */
 
 			OPECODE(opecode[BYTE2 & 0x0f]);
 			if(BYTE2 == 0x72 || BYTE2 == 0x74)
@@ -1029,7 +1027,7 @@ private void op04(address ptr, disasm * code) {
 			return;
 		}
 		if((WORD1 & 0xf0) == 0x40) {
-#ifdef	OSKDIS
+#ifdef  OSKDIS
 			if(BYTE2 & 15) {
 				IfNeedStr {
 					strcpy(code->opecode, "TCALL");
@@ -1047,9 +1045,9 @@ private void op04(address ptr, disasm * code) {
 					code->op1.ea = IMMED;
 					code->op1.opval = WORD2;
 				}
-				if(WORD2 == 0x0006	/* F$Exit  */
-				   || WORD2 == 0x001e	/* F$RTE   */
-				   || WORD2 == 0x002d) {	/* F$NProc */
+				if(WORD2 == 0x0006      /* F$Exit  */
+				   || WORD2 == 0x001e   /* F$RTE   */
+				   || WORD2 == 0x002d) {        /* F$NProc */
 					code->flag = RTSOP;
 					code->opflags += FLAG_NEED_NULSTR;
 				}
@@ -1068,7 +1066,7 @@ private void op04(address ptr, disasm * code) {
 #endif /* OSKDIS */
 		}
 
-		if((WORD1 & 0xf8) == 0x50) {	/* ワードリンク */
+		if((WORD1 & 0xf8) == 0x50) {    /* ワードリンク */
 			code->size = WORDSIZE;
 			setAn(&code->op1, WORD1);
 #if 0
@@ -1145,42 +1143,42 @@ private void op04(address ptr, disasm * code) {
 				char name[7];
 			} creg_table[2][9] = { {
 					{
-					M010 | M020 | M030 | M040 | M060, "sfc"},	/* 0x000 */
+					M010 | M020 | M030 | M040 | M060, "sfc"},       /* 0x000 */
 					{
-					M010 | M020 | M030 | M040 | M060, "dfc"},	/* 0x001 */
+					M010 | M020 | M030 | M040 | M060, "dfc"},       /* 0x001 */
 					{
-					M020 | M030 | M040 | M060, "cacr"},	/* 0x002 */
+					M020 | M030 | M040 | M060, "cacr"},     /* 0x002 */
 					{
-					M040 | M060, "tc"},	/* 0x003 */
+					M040 | M060, "tc"},     /* 0x003 */
 					{
-					M040 | M060, "itt0"},	/* 0x004 */
+					M040 | M060, "itt0"},   /* 0x004 */
 					{
-					M040 | M060, "itt1"},	/* 0x005 */
+					M040 | M060, "itt1"},   /* 0x005 */
 					{
-					M040 | M060, "dtt0"},	/* 0x006 */
+					M040 | M060, "dtt0"},   /* 0x006 */
 					{
-					M040 | M060, "dtt1"},	/* 0x007 */
+					M040 | M060, "dtt1"},   /* 0x007 */
 					{
-					M060, "buscr"},	/* 0x008 */
+					M060, "buscr"}, /* 0x008 */
 			}, {
 				{
-				M010 | M020 | M030 | M040 | M060, "usp"},	/* 0x800 */
+				M010 | M020 | M030 | M040 | M060, "usp"},       /* 0x800 */
 				{
-				M010 | M020 | M030 | M040 | M060, "vbr"},	/* 0x801 */
+				M010 | M020 | M030 | M040 | M060, "vbr"},       /* 0x801 */
 				{
-				M020 | M030, "caar"},	/* 0x802 */
+				M020 | M030, "caar"},   /* 0x802 */
 				{
-				M020 | M030 | M040, "msp"},	/* 0x803 */
+				M020 | M030 | M040, "msp"},     /* 0x803 */
 				{
-				M020 | M030 | M040, "isp"},	/* 0x804 */
+				M020 | M030 | M040, "isp"},     /* 0x804 */
 				{
-				M040, "mmusr"},	/* 0x805 */
+				M040, "mmusr"}, /* 0x805 */
 				{
-				M040 | M060, "urp"},	/* 0x806 */
+				M040 | M060, "urp"},    /* 0x806 */
 				{
-				M040 | M060, "srp"},	/* 0x807 */
+				M040 | M060, "srp"},    /* 0x807 */
 				{
-				M060, "pcr"},	/* 0x808 */
+				M060, "pcr"},   /* 0x808 */
 			}};
 			int i = (WORD2 & 0x800) >> 11;
 			int j = (WORD2 & 0x7ff);
@@ -1221,7 +1219,7 @@ private void op04(address ptr, disasm * code) {
 	}
 
 	if((WORD1 & 0xb80) == 0x880) {
-		if(WORD2 == 0) {		/* register field empty ? */
+		if(WORD2 == 0) {                /* register field empty ? */
 			UNDEFINED();
 			return;
 		}
@@ -1259,7 +1257,7 @@ private void op04(address ptr, disasm * code) {
 		case 0x808:
 			REJECT(M000 | M010);
 
-			code->size = LONGSIZE;	/* ロングワードリンク */
+			code->size = LONGSIZE;  /* ロングワードリンク */
 			setAn(&code->op1, WORD1);
 			code->op2.ea = IMMED;
 			code->bytes += 4;
@@ -1280,7 +1278,7 @@ private void op04(address ptr, disasm * code) {
 
 	switch (WORD1 & 0xfc0) {
 		case 0x4c0:
-			code->size = code->size2 = WORDSIZE;	/* move to ccr */
+			code->size = code->size2 = WORDSIZE;    /* move to ccr */
 			setEA(code, &code->op1, ptr, DATA);
 			IfNeedStr {
 				strcpy(code->opecode, "move");
@@ -1288,7 +1286,7 @@ private void op04(address ptr, disasm * code) {
 			}
 			return;
 		case 0x6c0:
-			code->size = code->size2 = WORDSIZE;	/* move to sr */
+			code->size = code->size2 = WORDSIZE;    /* move to sr */
 			setEA(code, &code->op1, ptr, DATA);
 			IfNeedStr {
 				strcpy(code->opecode, "move");
@@ -1296,7 +1294,7 @@ private void op04(address ptr, disasm * code) {
 			}
 			return;
 		case 0x0c0:
-			code->size = code->size2 = WORDSIZE;	/* move from sr */
+			code->size = code->size2 = WORDSIZE;    /* move from sr */
 			IfNeedStr {
 				strcpy(code->opecode, "move");
 				strcpy(code->op1.operand, "sr");
@@ -1306,7 +1304,7 @@ private void op04(address ptr, disasm * code) {
 		case 0x2c0:
 			REJECT(M000);
 
-			code->size = code->size2 = WORDSIZE;	/* move from ccr */
+			code->size = code->size2 = WORDSIZE;    /* move from ccr */
 			IfNeedStr {
 				strcpy(code->opecode, "move");
 				strcpy(code->op1.operand, "ccr");
@@ -1343,7 +1341,7 @@ private void op04(address ptr, disasm * code) {
 		/* tst */
 		if(BYTE1 == 0x4a) {
 			OPECODE("tst");
-			SETSIZE();			/* size が 0b11 なら tas */
+			SETSIZE();                      /* size が 0b11 なら tas */
 			setEA(code, &code->op1, ptr, (MPU_types & ~(M000 | M010)) ? ALL : DATA & CHANGE);
 			/* An 直接、PC 相対、即値は 68020 以降専用 */
 			if((ALL ^ (DATA & CHANGE)) & pow2[code->op1.ea])
@@ -1376,7 +1374,7 @@ private void op05(address ptr, disasm * code) {
 
 		IfNeedStr {
 			if(BYTE1 == 0x51 && Disasm_Dbra)
-				strcpy(code->opecode, "dbra");	/* dbf -> dbra */
+				strcpy(code->opecode, "dbra");  /* dbf -> dbra */
 			else {
 				strcpy(code->opecode, "db");
 				setcond(ptr, code);
@@ -1387,9 +1385,9 @@ private void op05(address ptr, disasm * code) {
 		setrelative(code->op2.operand, SignWORD2, &code->op2.opval);
 		code->jmp = code->op2.opval;
 		code->jmpea = code->op2.ea = PCDISP;
-		code->op2.labelchange1 = -1;	/* TRUE */
-#ifdef	OSKDIS					/* OS-9/680x0 のアセンブラ(r68)では DBcc */
-		code->size = NOTHING;	/* にサイズを付けるとエラーになるため    */
+		code->op2.labelchange1 = -1;    /* TRUE */
+#ifdef  OSKDIS                                  /* OS-9/680x0 のアセンブラ(r68)では DBcc */
+		code->size = NOTHING;   /* にサイズを付けるとエラーになるため    */
 #else
 		code->size = WORDSIZE;
 #endif
@@ -1481,7 +1479,7 @@ private void op06(address ptr, disasm * code) {
 	code->default_size = NOTHING;
 	code->jmp = code->op1.opval;
 	code->jmpea = code->op1.ea = PCDISP;
-	code->op1.labelchange1 = -1;	/* TRUE */
+	code->op1.labelchange1 = -1;    /* TRUE */
 }
 
 
@@ -1566,7 +1564,7 @@ private void op09(address ptr, disasm * code) {
 
 private void op0a(address ptr, disasm * code) {
 
-#ifndef	OSKDIS
+#ifndef OSKDIS
 	/* SXlable != NULL なら必ず Disasm_SX_Window == TRUE */
 	if(SXlabel && SXlabel[WORD1 & 0xfff]) {
 		IfNeedStr {
@@ -1737,16 +1735,16 @@ private void op0e(address ptr, disasm * code) {
 		code->bytes = 4;
 		OPECODE(bf_op[BYTE1 & 7].opname);
 		switch (bf_op[BYTE1 & 7].addressing) {
-			case BF_ONLY:		/* bf... ea{m:n} */
+			case BF_ONLY:           /* bf... ea{m:n} */
 				setEA(code, &code->op1, ptr, DATAREG | ((BYTE1 & 7) ? CTRLCHG : CONTROL));
 				setBitField(&code->op2, ptr);
 				break;
-			case BF_DREG:		/* bf... ea{m:n},dn */
+			case BF_DREG:           /* bf... ea{m:n},dn */
 				setEA(code, &code->op1, ptr, CONTROL | DATAREG);
 				setBitField(&code->op2, ptr);
 				setDn(&code->op3, BYTE3 >> 4);
 				break;
-			case DREG_BF:		/* bf... dn,ea{m:n} */
+			case DREG_BF:           /* bf... dn,ea{m:n} */
 				setDn(&code->op1, BYTE3 >> 4);
 				setEA(code, &code->op2, ptr, CTRLCHG | DATAREG);
 				setBitField(&code->op3, ptr);
@@ -1763,16 +1761,16 @@ private void op0e(address ptr, disasm * code) {
 			"asr", "asl", "lsr", "lsl", "roxr", "roxl", "ror", "rol"
 		};
 
-		if((WORD1 & 0xc0) == 0xc0) {	/* op.w <ea> */
+		if((WORD1 & 0xc0) == 0xc0) {    /* op.w <ea> */
 			code->size = code->size2 = WORDSIZE;
 			setEA(code, &code->op1, ptr, MEMORY & CHANGE);
 			OPECODE(sft_op[BYTE1 & 7]);
 		} else {
 			SETSIZE();
 			if(WORD1 & 0x20)
-				setDn(&code->op1, BYTE1 >> 1);	/* op.* dm,dn */
+				setDn(&code->op1, BYTE1 >> 1);  /* op.* dm,dn */
 			else
-				set18(&code->op1, BYTE1 >> 1);	/* op.* #q,dn */
+				set18(&code->op1, BYTE1 >> 1);  /* op.* #q,dn */
 			setDn(&code->op2, WORD1);
 			OPECODE(sft_op[((WORD1 & 0x18) >> 2) + (BYTE1 & 1)]);
 		}
@@ -1882,8 +1880,8 @@ static const unsigned char ExtensionFlags[128] = {
 
 
 /*
-	opecode FPm,FPn が有効  +1	fxxx fpm,fpn というformatが存在しない場合
-	opecode FPm     が有効  +2	fxxx fpn,fpn が fxxx fpn と解釈される場合
+	opecode FPm,FPn が有効  +1 fxxx fpm,fpn というformatが存在しない場合
+	opecode FPm     が有効  +2 fxxx fpn,fpn が fxxx fpn と解釈される場合
 
 	ex) ftst = 2,  fmove = 1,  fabs = 1+2
 */
@@ -1986,7 +1984,7 @@ private void op0f(address ptr, disasm * code) {
 
 		if(WORD1 == 0xf800 && WORD2 == 0x01c0) {
 			if(MPU_types & M060)
-				REJECT(~M060);	/* -m68060,cpu32 なら 68060 を優先 */
+				REJECT(~M060);  /* -m68060,cpu32 なら 68060 を優先 */
 			else if(!Disasm_CPU32) {
 				UNDEFINED();
 				return;
@@ -2004,14 +2002,14 @@ private void op0f(address ptr, disasm * code) {
 			IfNeedStr {
 				strcpy(code->opecode, "tblun");
 				if(WORD2 & 0x0800)
-					code->opecode[3] = 's';	/* Signed */
+					code->opecode[3] = 's'; /* Signed */
 				if((WORD2 & 0x0400) == 0)
-					code->opecode[4] = '\0';	/* Result rounded */
+					code->opecode[4] = '\0';        /* Result rounded */
 			}
 			code->bytes = 4;
 			code->size = code->size2 = (WORD2 >> 6) & 3;
 
-			if(BYTE3 & 1) {		/* <ea>,dx */
+			if(BYTE3 & 1) {         /* <ea>,dx */
 				/* リファレンスマニュアルには制御可変と書いてあ */
 				/* るが表の内容は制御可変ではない.      */
 				/* おまけに Signed では (an) が使えないとなって */
@@ -2020,7 +2018,7 @@ private void op0f(address ptr, disasm * code) {
 				if(WORD2 & 0x0800)
 					eamode &= ~ADRIND;
 				setEA(code, &code->op1, ptr, eamode);
-			} else				/* dym:dyn,dx */
+			} else                          /* dym:dyn,dx */
 				setPairDn(&code->op1, WORD1 & 7, WORD2 & 7);
 			setDn(&code->op2, BYTE3 >> 4);
 			return;
@@ -2069,12 +2067,12 @@ private void op0f(address ptr, disasm * code) {
 
 				if((WORD1 & 0xe0) == 0) {
 					OPECODE("pflusha");
-					if(WORD1 & (1 << 4)) {	/* pflusha(n) */
+					if(WORD1 & (1 << 4)) {  /* pflusha(n) */
 						if(WORD1 & 7) {
 							UNDEFINED();
-							return;	/* 未定義 reg.field */
+							return; /* 未定義 reg.field */
 						}
-					} else {	/* pflush(n) (an) */
+					} else {        /* pflush(n) (an) */
 						IfNeedStr {
 							code->opecode[6] = '\0';
 							strcpy(code->op1.operand, "(a0)");
@@ -2198,7 +2196,7 @@ private void op0f(address ptr, disasm * code) {
 						case 3:
 							if((MMU_type & MMU851) == 0)
 								break;
-							code->mputypes = M020;	/* 68020 + 68851 only */
+							code->mputypes = M020;  /* 68020 + 68851 only */
 
 							if(pmode == 2) {
 								if(WORD2 != 0x2800)
@@ -2225,10 +2223,10 @@ private void op0f(address ptr, disasm * code) {
 								break;
 							code->bytes = 4;
 							OPECODE("pflush");
-							setMMUfc(code, &code->op1, WORD2);	/* fc */
-							setMMUfc(code, &code->op2, (WORD2 >> 5) | 0x10);	/* #xx */
+							setMMUfc(code, &code->op1, WORD2);      /* fc */
+							setMMUfc(code, &code->op2, (WORD2 >> 5) | 0x10);        /* #xx */
 							if(pmode == 6)
-								setEA(code, &code->op3, ptr, CTRLCHG);	/* <ea> */
+								setEA(code, &code->op3, ptr, CTRLCHG);  /* <ea> */
 							return;
 						case 5:
 						case 7:
@@ -2237,16 +2235,16 @@ private void op0f(address ptr, disasm * code) {
 							REJECTnoPMMU();
 							code->bytes = 4;
 							OPECODE("pflushs");
-							setMMUfc(code, &code->op1, WORD2);	/* fc */
-							setMMUfc(code, &code->op2, (WORD2 >> 5) | 0x10);	/* #xx */
+							setMMUfc(code, &code->op1, WORD2);      /* fc */
+							setMMUfc(code, &code->op2, (WORD2 >> 5) | 0x10);        /* #xx */
 							if(pmode == 7)
-								setEA(code, &code->op3, ptr, CTRLCHG);	/* <ea> */
+								setEA(code, &code->op3, ptr, CTRLCHG);  /* <ea> */
 							return;
 					}
 				}
 				break;
 
-			case 0:			/* MC68EC030 では P-REGISTER = 000/001 が PMOVE to/from ACx */
+			case 0:                 /* MC68EC030 では P-REGISTER = 000/001 が PMOVE to/from ACx */
 			case 2:
 				if(BYTE4) {
 					UNDEFINED();
@@ -2254,18 +2252,18 @@ private void op0f(address ptr, disasm * code) {
 				}
 
 				switch (BYTE3 & 3) {
-					case 0:	/* MEMORY to MMUreg with FLUSH */
-					case 2:	/* MMUreg to MEMORY with FLUSH */
+					case 0: /* MEMORY to MMUreg with FLUSH */
+					case 2: /* MMUreg to MEMORY with FLUSH */
 						OPECODE("pmove");
 						break;
-					case 1:	/* MEMORY to MMUreg flush disable */
+					case 1: /* MEMORY to MMUreg flush disable */
 						if((MMU_type & MMU030) == 0)
 							break;
-						code->mputypes = M030;	/* pmovefd is 68030 only */
+						code->mputypes = M030;  /* pmovefd is 68030 only */
 
 						OPECODE("pmovefd");
 						break;
-					case 3:	/* MMUreg to MEMORY flush disable */
+					case 3: /* MMUreg to MEMORY flush disable */
 						UNDEFINED();
 						return;
 				}
@@ -2300,7 +2298,7 @@ private void op0f(address ptr, disasm * code) {
 					REJECT(~mmu_regs[n].mpu);
 					code->size = code->size2 = code->default_size = mmu_regs[n].size;
 
-					if(BYTE3 & 2) {	/* MMUreg to MEMORY */
+					if(BYTE3 & 2) { /* MMUreg to MEMORY */
 						int ea = (WORD1 >> 3) & 7;
 
 						if(ea == 7)
@@ -2313,13 +2311,13 @@ private void op0f(address ptr, disasm * code) {
 						}
 						code->op1.ea = MMUreg;
 						code->bytes = 4;
-						n = ((MMU_type & MMU851) ? CHANGE : 0)	/* 68851=可変       */
-							|((MMU_type & MMU030) ? CTRLCHG : 0);	/* 68030=制御・可変 */
+						n = ((MMU_type & MMU851) ? CHANGE : 0)  /* 68851=可変       */
+							|((MMU_type & MMU030) ? CTRLCHG : 0);   /* 68030=制御・可変 */
 						if(code->size == QUADSIZE)
-							n &= ~(DATAREG | ADRREG);	/* crp,drp,srp -> dn,an は不可 */
+							n &= ~(DATAREG | ADRREG);       /* crp,drp,srp -> dn,an は不可 */
 						setEA(code, &code->op2, ptr, n);
 						return;
-					} else {	/* MEMORY to MMUreg */
+					} else {        /* MEMORY to MMUreg */
 						int ea = (WORD1 >> 3) & 7;
 
 						if(ea == 7)
@@ -2332,10 +2330,10 @@ private void op0f(address ptr, disasm * code) {
 						}
 						code->op2.ea = MMUreg;
 						code->bytes = 4;
-						n = ((MMU_type & MMU851) ? ALL : 0)	/* 68851=全て       */
-							|((MMU_type & MMU030) ? CTRLCHG : 0);	/* 68030=制御・可変 */
+						n = ((MMU_type & MMU851) ? ALL : 0)     /* 68851=全て       */
+							|((MMU_type & MMU030) ? CTRLCHG : 0);   /* 68030=制御・可変 */
 						if(code->size == QUADSIZE)
-							n &= ~(DATAREG | ADRREG);	/* dn,an -> crp,drp,srp は不可 */
+							n &= ~(DATAREG | ADRREG);       /* dn,an -> crp,drp,srp は不可 */
 						setEA(code, &code->op1, ptr, n);
 						return;
 					}
@@ -2384,16 +2382,16 @@ private void op0f(address ptr, disasm * code) {
 		code->mputypes = M020;
 
 		switch (temp) {
-			case 0:			/* 解析済 */
+			case 0:                 /* 解析済 */
 				break;
-			case 1:			/* PCss, PDBcc, PTRAPcc */
+			case 1:                 /* PCss, PDBcc, PTRAPcc */
 				if(WORD2 & 0xffc0) {
 					UNDEFINED();
 					return;
 				}
 				switch ((WORD1 >> 3) & 7) {
 					case 1:
-						IfNeedStr {	/* PDBcc */
+						IfNeedStr {     /* PDBcc */
 							strcpy(code->opecode, "pdb");
 							MMUCOND(code, WORD2);
 						}
@@ -2401,13 +2399,13 @@ private void op0f(address ptr, disasm * code) {
 						setrelative4(code->op2.operand, SignWORD3, &code->op2.opval);
 						code->jmp = code->op2.opval;
 						code->jmpea = code->op2.ea = PCDISP;
-						code->op2.labelchange1 = -1;	/* TRUE */
+						code->op2.labelchange1 = -1;    /* TRUE */
 						code->flag = BCCOP;
 						code->bytes = 6;
-						code->size = code->size2 = WORDSIZE;	/* default_size も word */
+						code->size = code->size2 = WORDSIZE;    /* default_size も word */
 						break;
 					case 7:
-						code->bytes = 4;	/* PTRAPcc */
+						code->bytes = 4;        /* PTRAPcc */
 
 						switch (WORD1 & 7) {
 							case 2:
@@ -2433,7 +2431,7 @@ private void op0f(address ptr, disasm * code) {
 #endif
 						break;
 					default:
-						IfNeedStr {	/* PScc */
+						IfNeedStr {     /* PScc */
 							strcpy(code->opecode, "ps");
 							MMUCOND(code, WORD2);
 						}
@@ -2445,7 +2443,7 @@ private void op0f(address ptr, disasm * code) {
 				return;
 			case 2:
 			case 3:
-				IfNeedStr {		/* PBcc */
+				IfNeedStr {             /* PBcc */
 					strcpy(code->opecode, "pb");
 					MMUCOND(code, WORD1);
 				}
@@ -2467,7 +2465,7 @@ private void op0f(address ptr, disasm * code) {
 				code->jmp = code->op1.opval;
 				code->jmpea = code->op1.ea = PCDISP;
 				code->flag = BCCOP;
-				code->op1.labelchange1 = -1;	/* TRUE */
+				code->op1.labelchange1 = -1;    /* TRUE */
 				return;
 			case 4:
 				OPECODE("psave");
@@ -2505,9 +2503,9 @@ private void op0f(address ptr, disasm * code) {
 		code->default_size = EXTENDSIZE;
 
 		switch ((WORD1 >> 6) & 7) {
-			case 0:			/* type 000(一般命令) */
-				switch (BYTE3 >> 5) {	/* opclass */
-					case 0:	/* FPm to FPn */
+			case 0:                 /* type 000(一般命令) */
+				switch (BYTE3 >> 5) {   /* opclass */
+					case 0: /* FPm to FPn */
 						if(BYTE2) {
 							UNDEFINED();
 							return;
@@ -2518,7 +2516,7 @@ private void op0f(address ptr, disasm * code) {
 						code->size = code->size2 = EXTENDSIZE;
 						setFPn(&code->op1, BYTE3 >> 2);
 
-						if((WORD2 & 0x78) == 0x30) {	/* fsincos */
+						if((WORD2 & 0x78) == 0x30) {    /* fsincos */
 							IfNeedStr {
 								strcpy(code->op2.operand, "fp0:fp0");
 								code->op2.operand[2] += WORD2 & 7;
@@ -2528,7 +2526,7 @@ private void op0f(address ptr, disasm * code) {
 						} else {
 							if(ExtensionFormat[WORD2 & 0x7f] & 1) {
 								if((ExtensionFormat[WORD2 & 0x7f] & 2)
-								   && (((BYTE3 >> 2) & 7) == ((WORD2 >> 7) & 7)));	/* f??? fpn */
+								   && (((BYTE3 >> 2) & 7) == ((WORD2 >> 7) & 7)));      /* f??? fpn */
 								/* fxxx fpn,fpn が fxxx fpn となる場合 */
 								else
 									setFPn(&code->op2, WORD2 >> 7);
@@ -2541,11 +2539,11 @@ private void op0f(address ptr, disasm * code) {
 							}
 							return;
 						}
-					case 1:	/* undefined, reserved */
+					case 1: /* undefined, reserved */
 						UNDEFINED();
 						return;
-					case 2:	/* Memory to FPn or movecr */
-						if(((BYTE3 >> 2) & 7) == 7) {	/* movecr */
+					case 2: /* Memory to FPn or movecr */
+						if(((BYTE3 >> 2) & 7) == 7) {   /* movecr */
 							REJECTnoFPSP();
 							code->bytes = 4;
 							code->size = code->size2 = EXTENDSIZE;
@@ -2558,7 +2556,7 @@ private void op0f(address ptr, disasm * code) {
 							code->op1.opval = (address) ((UINTPTR) WORD2 & 0x7f);
 							setFPn(&code->op2, WORD2 >> 7);
 							return;
-						} else {	/* Memory to FPn */
+						} else {        /* Memory to FPn */
 							static const int fpsize2size[7] = {
 								LONGSIZE, SINGLESIZE, EXTENDSIZE,
 								PACKEDSIZE, WORDSIZE, DOUBLESIZE,
@@ -2577,7 +2575,7 @@ private void op0f(address ptr, disasm * code) {
 								REJECTnoFPSP();
 							setEA(code, &code->op1, ptr, fpsize2sea[(BYTE3 >> 2) & 7]);
 
-							if((WORD2 & 0x78) == 0x30) {	/* fsincos */
+							if((WORD2 & 0x78) == 0x30) {    /* fsincos */
 								IfNeedStr {
 									strcpy(code->op2.operand, "fp0:fp0");
 									code->op2.operand[2] += (WORD2 & 7);
@@ -2586,32 +2584,32 @@ private void op0f(address ptr, disasm * code) {
 							} else {
 								if(ExtensionFormat[WORD2 & 0x7f] & 1)
 									setFPn(&code->op2, WORD2 >> 7);
-								else if((WORD2 >> 7) & 7) {	/* should be zero ... */
+								else if((WORD2 >> 7) & 7) {     /* should be zero ... */
 									UNDEFINED();
 									return;
 								}
 							}
 							return;
 						}
-					case 3:	/* move FPn to ... */
+					case 3: /* move FPn to ... */
 						OPECODE("fmove");
 						code->bytes = 4;
 						setFPn(&code->op1, WORD2 >> 7);
 
-						switch ((BYTE3 >> 2) & 7) {	/* destination format */
-							case 0:	/* Long */
+						switch ((BYTE3 >> 2) & 7) {     /* destination format */
+							case 0: /* Long */
 								code->size = code->size2 = LONGSIZE;
 								setEA(code, &code->op2, ptr, DATA & CHANGE);
 								break;
-							case 1:	/* Single */
+							case 1: /* Single */
 								code->size = code->size2 = SINGLESIZE;
 								setEA(code, &code->op2, ptr, DATA & CHANGE);
 								break;
-							case 2:	/* Extend */
+							case 2: /* Extend */
 								code->size = code->size2 = EXTENDSIZE;
 								setEA(code, &code->op2, ptr, (DATA & CHANGE) ^ DATAREG);
 								break;
-							case 3:	/* Packed with Static K-Factor */
+							case 3: /* Packed with Static K-Factor */
 								REJECTnoFPSP();
 								code->size = code->size2 = PACKEDSIZE;
 								setEA(code, &code->op2, ptr, (DATA & CHANGE) ^ DATAREG);
@@ -2631,19 +2629,19 @@ private void op0f(address ptr, disasm * code) {
 									*p = '\0';
 								}
 								break;
-							case 4:	/* Word */
+							case 4: /* Word */
 								code->size = code->size2 = WORDSIZE;
 								setEA(code, &code->op2, ptr, DATA & CHANGE);
 								break;
-							case 5:	/* Double */
+							case 5: /* Double */
 								code->size = code->size2 = DOUBLESIZE;
 								setEA(code, &code->op2, ptr, (DATA & CHANGE) ^ DATAREG);
 								break;
-							case 6:	/* Byte */
+							case 6: /* Byte */
 								code->size = code->size2 = BYTESIZE;
 								setEA(code, &code->op2, ptr, DATA & CHANGE);
 								break;
-							case 7:	/* Packed with Dynamic K-Factor */
+							case 7: /* Packed with Dynamic K-Factor */
 								REJECTnoFPSP();
 								code->size = code->size2 = PACKEDSIZE;
 								setEA(code, &code->op2, ptr, (DATA & CHANGE) ^ DATAREG);
@@ -2655,7 +2653,7 @@ private void op0f(address ptr, disasm * code) {
 								break;
 						}
 						return;
-					case 4:	/* move(m) Mem to FPCR/FPSR,FPIAR */
+					case 4: /* move(m) Mem to FPCR/FPSR,FPIAR */
 						{
 							int regno = (BYTE3 >> 2) & 7;
 							adrmode addressing = setFPCRSRlist(&code->op2, regno);
@@ -2667,21 +2665,21 @@ private void op0f(address ptr, disasm * code) {
 							IfNeedStr {
 								strcpy(code->opecode, "fmovem");
 								if(regno == 1 || regno == 2 || regno == 4)
-									code->opecode[5] = '\0';	/* fmovem -> fmove */
+									code->opecode[5] = '\0';        /* fmovem -> fmove */
 							}
 							code->bytes = 4;
 							code->size = code->size2 = code->default_size = LONGSIZE;
 							setEA(code, &code->op1, ptr, addressing);
 							if(code->op1.ea == IMMED) {
 								switch (regno) {
-									case 3:	/* fmovem.l #imm,#imm,reg */
+									case 3: /* fmovem.l #imm,#imm,reg */
 									case 5:
 									case 6:
 										REJECTnoFPSP();
 										setEA(code, &code->op2, ptr, addressing);
 										setFPCRSRlist(&code->op3, regno);
 										break;
-									case 7:	/* fmovem.l #imm,#imm,#imm,reg */
+									case 7: /* fmovem.l #imm,#imm,#imm,reg */
 										REJECTnoFPSP();
 										setEA(code, &code->op2, ptr, addressing);
 										setEA(code, &code->op3, ptr, addressing);
@@ -2693,7 +2691,7 @@ private void op0f(address ptr, disasm * code) {
 							}
 							return;
 						}
-					case 5:	/* move(m) FPCR/FPSR,FPIAR to Mem */
+					case 5: /* move(m) FPCR/FPSR,FPIAR to Mem */
 						{
 							adrmode addressing = setFPCRSRlist(&code->op1, BYTE3 >> 2);
 
@@ -2706,16 +2704,16 @@ private void op0f(address ptr, disasm * code) {
 
 								strcpy(code->opecode, "fmovem");
 								if((mode = (BYTE3 >> 2) & 7) == 1 || mode == 2 || mode == 4)
-									code->opecode[5] = '\0';	/* fmovem -> fmove */
+									code->opecode[5] = '\0';        /* fmovem -> fmove */
 							}
 							code->bytes = 4;
 							code->size = code->size2 = code->default_size = LONGSIZE;
 							setEA(code, &code->op2, ptr, addressing & CHANGE);
 							return;
 						}
-					case 6:	/* fmovem.x Mem to FPCP */
+					case 6: /* fmovem.x Mem to FPCP */
 						if((BYTE3 & 7) == 0) {
-							OPECODE("fmovem");	/* from MEMORY to FPCP */
+							OPECODE("fmovem");      /* from MEMORY to FPCP */
 							code->bytes = 4;
 							code->size = code->size2 = EXTENDSIZE;
 
@@ -2739,9 +2737,9 @@ private void op0f(address ptr, disasm * code) {
 							return;
 						}
 						break;
-					case 7:	/* fmovem.x FPCP to Mem */
+					case 7: /* fmovem.x FPCP to Mem */
 						if((BYTE3 & 7) == 0) {
-							OPECODE("fmovem");	/* from FPCP to MEMORY */
+							OPECODE("fmovem");      /* from FPCP to MEMORY */
 							code->bytes = 4;
 							code->size = code->size2 = EXTENDSIZE;
 							switch ((BYTE3 >> 3) & 3) {
@@ -2764,14 +2762,14 @@ private void op0f(address ptr, disasm * code) {
 						break;
 				}
 
-			case 1:			/* type 001(FDBcc/FScc/FTRAPcc) */
+			case 1:                 /* type 001(FDBcc/FScc/FTRAPcc) */
 				if(WORD2 & 0xffc0) {
 					UNDEFINED();
 					return;
 				}
-				REJECT060noFPSP();	/* 68060 のみ Software Emulation */
+				REJECT060noFPSP();      /* 68060 のみ Software Emulation */
 
-				if((WORD1 & 0x38) == 0x08) {	/* FDBcc */
+				if((WORD1 & 0x38) == 0x08) {    /* FDBcc */
 					IfNeedStr {
 						if(Disasm_Dbra && (WORD2 & 0x1f) == 0)
 							strcpy(code->opecode, "fdbra");
@@ -2785,13 +2783,13 @@ private void op0f(address ptr, disasm * code) {
 					code->default_size = NOTHING;
 					code->jmp = code->op2.opval;
 					code->jmpea = code->op2.ea = PCDISP;
-					code->op2.labelchange1 = -1;	/* TRUE */
+					code->op2.labelchange1 = -1;    /* TRUE */
 					code->flag = BCCOP;
 					code->bytes = 6;
 					return;
 				}
 
-				if(0x7a < BYTE2) {	/* FScc */
+				if(0x7a < BYTE2) {      /* FScc */
 					IfNeedStr {
 						strcpy(code->opecode, "fs");
 						FPCOND(code, WORD2);
@@ -2802,7 +2800,7 @@ private void op0f(address ptr, disasm * code) {
 					return;
 				}
 
-				if(BYTE2 < 0x7d) {	/* FTRAPcc */
+				if(BYTE2 < 0x7d) {      /* FTRAPcc */
 					code->bytes = 4;
 					if((WORD1 & 7) != 4) {
 						code->size = ((WORD1 & 7) == 2) ? WORDSIZE : LONGSIZE;
@@ -2819,14 +2817,14 @@ private void op0f(address ptr, disasm * code) {
 				}
 				break;
 
-			case 2:			/* type 010(FBcc.W) */
+			case 2:                 /* type 010(FBcc.W) */
 				if((BYTE2 == 0x80) && (WORD2 == 0x00)) {
 					OPECODE("fnop");
 					code->bytes = 4;
 					return;
 				}
 				/* fall through */
-			case 3:			/* type 011(FBcc.L) */
+			case 3:                 /* type 011(FBcc.L) */
 				if((WORD1 & 0x1f) == 15) {
 					IfNeedStr {
 						strcpy(code->opecode, "fbra");
@@ -2853,21 +2851,21 @@ private void op0f(address ptr, disasm * code) {
 #endif
 				code->jmp = code->op1.opval;
 				code->jmpea = code->op1.ea = PCDISP;
-				code->op1.labelchange1 = -1;	/* TRUE */
+				code->op1.labelchange1 = -1;    /* TRUE */
 				return;
 
-			case 4:			/* type 100(FSAVE) */
+			case 4:                 /* type 100(FSAVE) */
 				OPECODE("fsave");
 				setEA(code, &code->op1, ptr, CTRLCHG | PREDEC);
 				return;
 
-			case 5:			/* type 101(FRESTORE) */
+			case 5:                 /* type 101(FRESTORE) */
 				OPECODE("frestore");
 				setEA(code, &code->op1, ptr, CONTROL | POSTINC);
 				return;
 
-			case 6:			/* type 110(未定義命令) */
-			case 7:			/* type 111(〃)     */
+			case 6:                 /* type 110(未定義命令) */
+			case 7:                 /* type 111(〃)     */
 				break;
 		}
 		UNDEFINED();
@@ -2876,14 +2874,14 @@ private void op0f(address ptr, disasm * code) {
 	code->mputypes = ~0;
 
 
-#ifndef	OSKDIS
+#ifndef OSKDIS
 	/* F line Emulator($ffxx:DOSコール、$fexx:FPACKコール) */
 
 	switch (BYTE1) {
 		case 0xff:
 			if(OSlabel && OSlabel[BYTE2]) {
 				if(BYTE2 == DOS_EXIT || BYTE2 == DOS_EXIT2 || BYTE2 == DOS_KEEPPR
-#ifdef	DOS_KILL_PR_IS_RTSOP
+#ifdef  DOS_KILL_PR_IS_RTSOP
 				   || BYTE2 == DOS_KILL_PR
 #endif
 					) {
@@ -2917,9 +2915,9 @@ private void op0f(address ptr, disasm * code) {
 
 	if(Disasm_UnusedTrapUndefined) {
 		UNDEFINED();
-		return;					/* 未使用のF line及びA lineを未定義命令とする */
+		return;                                 /* 未使用のF line及びA lineを未定義命令とする */
 	} else {
-		IfNeedStr {				/* そうでなければ無理矢理命令にする */
+		IfNeedStr {                             /* そうでなければ無理矢理命令にする */
 			strcpy(code->opecode, DC_WORD);
 			itox4d(code->op1.operand, WORD1);
 		}
@@ -2960,7 +2958,7 @@ private void setMMUfc(disasm * code, operand * op, int fc) {
 			}
 			break;
 		case 3:
-			REJECTnoPMMU();		/* #xx が 8～15 なら 68020 */
+			REJECTnoPMMU();         /* #xx が 8～15 なら 68020 */
 			/* fall through */
 		case 2:
 			op->ea = IMMED;
@@ -3086,14 +3084,14 @@ private void setreglist(char *operandstr, address ptr) {
 	if(!Disasm_String)
 		return;
 
-	if((WORD1 & 0x38) == 0x20) {	/* pre-decrement ? */
+	if((WORD1 & 0x38) == 0x20) {    /* pre-decrement ? */
 		field = 0;
 		for(i = 0; i < 16; i++)
 			field |= (WORD2 & pow2[i]) ? pow2[15 - i] : 0;
 	} else
 		field = WORD2;
 
-	field2 = field & 0xff;		/* lower 8 bit */
+	field2 = field & 0xff;          /* lower 8 bit */
 	for(i = 0, flag = FALSE, already = FALSE; i < 9; i++) {
 		if(!flag && field2 & pow2[i]) {
 			start = i;
@@ -3188,7 +3186,7 @@ private void setIMD(disasm * code, operand * op, address ptr, opesize size) {
 				itox8d(optr, (LONG) op->opval);
 			}
 			break;
-		default:				/* reduce warning message */
+		default:                                /* reduce warning message */
 			break;
 	}
 }
@@ -3197,7 +3195,7 @@ private void setIMD(disasm * code, operand * op, address ptr, opesize size) {
 private void setAnDisp(disasm * code, operand * op, int regno, int disp) {
 	WORD d16 = (WORD) disp;
 
-#ifdef	OSKDIS
+#ifdef  OSKDIS
 
 	if(regno == 6) {
 		ULONG a6disp = (ULONG) disp;
@@ -3205,10 +3203,10 @@ private void setAnDisp(disasm * code, operand * op, int regno, int disp) {
 		lblmode wkmode;
 
 		switch (HeadOSK.type & 0x0F00) {
-			case 0x0100:		/* Program */
-			case 0x0b00:		/* Trap */
-				a6disp += 0x8000;	/* A6 のオフセットを調整 */
-				d16 = disp + 0x8000;	/* A6 のオフセットを調整 */
+			case 0x0100:            /* Program */
+			case 0x0b00:            /* Trap */
+				a6disp += 0x8000;       /* A6 のオフセットを調整 */
+				d16 = disp + 0x8000;    /* A6 のオフセットを調整 */
 #if 0
 				regist_label(BeginBSS + a6disp, DATLABEL | UNKNOWN);
 #endif
@@ -3224,9 +3222,9 @@ private void setAnDisp(disasm * code, operand * op, int regno, int disp) {
 					char *p = op->operand;
 
 					*p++ = '(';
-					*p++ = 'L';	/* ラベル生成手抜き版     */
-					*p++ = '0';	/* L00xxxx なラベルを作る */
-					*p++ = '0';	/* 値は７行上で登録済     */
+					*p++ = 'L';     /* ラベル生成手抜き版     */
+					*p++ = '0';     /* L00xxxx なラベルを作る */
+					*p++ = '0';     /* 値は７行上で登録済     */
 					p = strcpy(itox4(p, BeginBSS + d16), ",a0)");
 					p[2] += regno;
 				}
@@ -3273,11 +3271,11 @@ private void setAnDisp(disasm * code, operand * op, int regno, int disp) {
 	}
 
 private void setEA(disasm * code, operand * op, address ptr, int mode) {
-	int eamode, eareg;			/* 実効アドレスモード、実効アドレスレジスタ */
+	int eamode, eareg;                      /* 実効アドレスモード、実効アドレスレジスタ */
 	LONG temp;
 	char *p = op->operand;
 
-	if(mode & MOVEOPT) {		/* move 命令の第２オペランドの場合 */
+	if(mode & MOVEOPT) {            /* move 命令の第２オペランドの場合 */
 		eamode = (WORD1 >> 6) & 7;
 		eareg = (BYTE1 >> 1) & 7;
 	} else {
@@ -3296,7 +3294,7 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 		op->ea = 8 + eareg;
 
 		switch (eareg) {
-			case 0:			/* (abs).w AbShort */
+			case 0:                 /* (abs).w AbShort */
 				d16 = (WORD) peekw(ptr + code->bytes);
 				op->opval = (address) (LONG) d16;
 				ODDCHECK;
@@ -3316,7 +3314,7 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 				}
 				code->bytes += 2;
 				return;
-			case 1:			/* (abs).l AbLong */
+			case 1:                 /* (abs).l AbLong */
 				op->opval = (address) peekl(ptr + code->bytes);
 				ODDCHECK;
 				IfNeedStr {
@@ -3331,7 +3329,7 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 				}
 				code->bytes += 4;
 				return;
-			case 2:			/* (d16,pc) */
+			case 2:                 /* (d16,pc) */
 				op->labelchange1 = TRUE;
 				d16 = (WORD) peekw(ptr + code->bytes);
 				op->opval = PC + code->bytes + d16;
@@ -3347,9 +3345,9 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 				}
 				code->bytes += 2;
 				return;
-			case 3:			/* (d8,pc,ix) */
+			case 3:                 /* (d8,pc,ix) */
 				op->labelchange1 = TRUE;
-				temp = peekw(ptr + code->bytes);	/* temp = 拡張ワード */
+				temp = peekw(ptr + code->bytes);        /* temp = 拡張ワード */
 
 				/* フルフォーマットの拡張ワード */
 				if(temp & 0x0100) {
@@ -3498,14 +3496,14 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 								bd &= 0xffff;
 								p = itox4d(p, bd);
 								if(bd <= lim && !indirect) {
-									*p++ = '.';	/* (d8.w,pc,ix) */
+									*p++ = '.';     /* (d8.w,pc,ix) */
 									*p++ = 'w';
 								}
 
 							} else if(bdsize == 4) {
 								p = itox8d(p, bd);
 								if(bd <= lim) {
-									*p++ = '.';	/* (d16.l,pc,ix) */
+									*p++ = '.';     /* (d16.l,pc,ix) */
 									*p++ = 'l';
 								}
 							}
@@ -3513,7 +3511,7 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 						}
 
 						if(zareg)
-							*p++ = 'z';	/* zpc は省略不可 */
+							*p++ = 'z';     /* zpc は省略不可 */
 						*p++ = 'p';
 						*p++ = 'c';
 
@@ -3571,7 +3569,7 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 				else {
 					signed char d8 = *(signed char *)(ptr + code->bytes + 1);
 
-					temp = *(UBYTE *) (ptr + code->bytes);	/* temp = 拡張ワード */
+					temp = *(UBYTE *) (ptr + code->bytes);  /* temp = 拡張ワード */
 					op->opval = PC + d8 + code->bytes;
 
 					/* scaling check (68020 未満のチェック) */
@@ -3621,7 +3619,7 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 					}
 					return;
 				} else {
-					switch (code->size) {	/* #Imm */
+					switch (code->size) {   /* #Imm */
 						case BYTESIZE:
 							{
 								UBYTE undefbyte = *(UBYTE *) (ptr + code->bytes);
@@ -3659,28 +3657,28 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 							}
 							code->bytes += 4;
 							return;
-						case QUADSIZE:	/* 8bytes (MMU命令専用) */
+						case QUADSIZE:  /* 8bytes (MMU命令専用) */
 							IfNeedStr {
 								*p++ = '#';
 								fpconv_q(p, (quadword *) (ptr + code->bytes));
 							}
 							code->bytes += 8;
 							return;
-						case SINGLESIZE:	/* 単精度実数(4byte) */
+						case SINGLESIZE:        /* 単精度実数(4byte) */
 							IfNeedStr {
 								*p++ = '#';
 								fpconv_s(p, (float *)(ptr + code->bytes));
 							}
 							code->bytes += 4;
 							return;
-						case DOUBLESIZE:	/* 倍精度実数(8byte) */
+						case DOUBLESIZE:        /* 倍精度実数(8byte) */
 							IfNeedStr {
 								*p++ = '#';
 								fpconv_d(p, (double *)(ptr + code->bytes));
 							}
 							code->bytes += 8;
 							return;
-						case EXTENDSIZE:	/* 拡張精度実数(12byte) */
+						case EXTENDSIZE:        /* 拡張精度実数(12byte) */
 							REJECTnoFPSP();
 							IfNeedStr {
 								*p++ = '#';
@@ -3688,7 +3686,7 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 							}
 							code->bytes += 12;
 							return;
-						case PACKEDSIZE:	/* パックドデシマル(12byte) */
+						case PACKEDSIZE:        /* パックドデシマル(12byte) */
 							REJECTnoFPSP();
 							IfNeedStr {
 								*p++ = '#';
@@ -3697,14 +3695,14 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 							code->bytes += 12;
 							return;
 
-						default:	/* reduce warning message */
+						default:        /* reduce warning message */
 							break;
 					}
 				}
 		}
 	}
 
-	else {						/* eamode != 7 */
+	else {                                          /* eamode != 7 */
 		if((mode & pow2[eamode]) == 0) {
 			UNDEFINED();
 			return;
@@ -3718,33 +3716,33 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 		/* 0～ 4 では 常にオペランド文字列を生成してよい. */
 		switch (eamode) {
 			case 0:
-				op->operand[0] = 'd';	/* Dn */
+				op->operand[0] = 'd';   /* Dn */
 				op->operand[1] = (eareg & 7) + '0';
 				op->operand[2] = 0;
 				return;
 			case 1:
-				op->operand[0] = 'a';	/* An */
+				op->operand[0] = 'a';   /* An */
 				op->operand[1] = (eareg & 7) + '0';
 				op->operand[2] = 0;
 				return;
 			case 2:
-				strcpy(op->operand, "(a0)");	/* (An) */
+				strcpy(op->operand, "(a0)");    /* (An) */
 				op->operand[2] += eareg;
 				return;
 			case 3:
-				strcpy(op->operand, "(a0)+");	/* (An)+ */
+				strcpy(op->operand, "(a0)+");   /* (An)+ */
 				op->operand[2] += eareg;
 				return;
 			case 4:
-				strcpy(op->operand, "-(a0)");	/* -(An) */
+				strcpy(op->operand, "-(a0)");   /* -(An) */
 				op->operand[3] += eareg;
 				return;
-			case 5:			/* (d16,An) */
+			case 5:                 /* (d16,An) */
 				setAnDisp(code, op, eareg, (WORD) peekw(ptr + code->bytes));
 				return;
 
 			case 6:
-				temp = peekw(ptr + code->bytes);	/* temp = 拡張ワード */
+				temp = peekw(ptr + code->bytes);        /* temp = 拡張ワード */
 
 				/* フルフォーマットの拡張ワード */
 				if(*(UBYTE *) (ptr + code->bytes) & 1) {
@@ -3872,7 +3870,7 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 					zareg = (temp & 0x80);
 					if(zareg && (UndefRegLevel & 2) && eareg) {
 						UNDEFINED();
-						return;	/* サプレスされたレジスタが a0 ではない */
+						return; /* サプレスされたレジスタが a0 ではない */
 					}
 
 					if(bdsize == 4)
@@ -3899,14 +3897,14 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 								bd &= 0xffff;
 								p = itox4d(p, bd);
 								if(bd <= lim && !indirect) {
-									*p++ = '.';	/* (d8.w,an,ix) */
+									*p++ = '.';     /* (d8.w,an,ix) */
 									*p++ = 'w';
 								}
 
 							} else if(bdsize == 4) {
 								p = itox8d(p, bd);
 								if(bd <= lim) {
-									*p++ = '.';	/* (d16.l,an,ix) */
+									*p++ = '.';     /* (d16.l,an,ix) */
 									*p++ = 'l';
 								}
 							}
@@ -3972,7 +3970,7 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 				}
 
 				/* 短縮フォーマットの拡張ワード */
-				else {			/* (d8,An,ix) */
+				else {                  /* (d8,An,ix) */
 					signed char d8 = *(signed char *)(ptr + code->bytes + 1);
 
 					temp = *(UBYTE *) (ptr + code->bytes);
