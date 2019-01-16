@@ -117,7 +117,7 @@ load_OS_sym (void)
 	&& (Sxcall_mac_path = getenv ("dis_sxmac")) != NULL
 	&& *Sxcall_mac_path) {
 	if (!readfile (Sxcall_mac_path, &SXlabel, 0x0a, SXCallName, SXCALL_MAX))
-		err ("%s をオープン出来ません.\n" , Sxcall_mac_path);
+		err ("Can not open %s.\n" , Sxcall_mac_path);
 	}
 }
 #endif	/* OSKDIS */
@@ -184,9 +184,9 @@ search_and_readfile (const char** bufptr, const char* filename,
 	}
 
 	if (path_flag || dis_inc || include)
-	err ("%s をオープン出来ません.\n", filename);
+	err ("Unable to open %s.\n", filename);
 	else
-	err ("環境変数 (dis_)include が設定されていません.\n");
+	err ("Environment variable (dis_)include is not set.\n");
 }
 #endif	/* !OSKDIS */
 
