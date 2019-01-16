@@ -1,9 +1,11 @@
 Source code generator for X680x0 version 3.16
 =============================================
 
+```text
 Copyright (C)1989-1992 K.Abe
 Copyright (C)1994-1997 R.ShimiZu
 Copyright (C)1997-2010 Tachibana
+```
 
 I've taken the [rururutan code](http://www.vesta.dti.ne.jp/~tsato/arc/dis-3.16w32.zip) and made it work on a 64-bit target.
 
