@@ -490,7 +490,7 @@ storeexp (address v, int mode)
 	exp->registed = TRUE;
 	if (ParseMode == PARSE_ANALYZING
 	 && !regist_label (v, DATLABEL | UNKNOWN))
-		printf ("??? address %"PRI_UINTPTR"\n", (UINTPTR) v);
+		eprintf ("??? address %"PRI_UINTPTR"\n", (UINTPTR) v);
 	} else
 	exp->registed = FALSE;
 
