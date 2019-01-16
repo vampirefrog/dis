@@ -23,7 +23,7 @@ static address* Reltable = NULL;	/* 再配置テーブルの頭 */
 static int Relnum;			/* 再配置テーブルの要素数 */
 
 
-#ifdef	DEBUG
+#ifdef DEBUG
 private void
 disp_reltable (void)
 {
@@ -33,7 +33,6 @@ disp_reltable (void)
 	printf ("%5x\n", Reltable[i]);
 }
 #endif
-
 
 /*
 
@@ -46,8 +45,8 @@ make_relocate_table (void)
 	address destadrs = BeginTEXT;
 	UBYTE* ptr;		/* オフセット表へのポインタ ( not always even !) */
 
-	if ((Reltable = (address *) Malloc (Head.offset * 2)) == NULL)
-	err ("リロケート情報の展開バッファを確保出来ませんでした\n");
+	if ((Reltable = (address *) Malloc (Head.offset * sizeof(address))) == NULL)
+	err ("We could not secure the expansion buffer for relocate information\n");
 
 	Relnum = 0;
 	ptr = (UBYTE*) (Top + Head.text + Head.data);
