@@ -20,7 +20,8 @@ Documentation
 Compiling on 64-bit linux
 -------------------------
 ```
-cd src && make -f ports/Makefile_Linux
+cd src
+make -f ports/Makefile_Linux
 ```
 
 You can also install in `/usr/local/bin`:
