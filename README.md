@@ -19,13 +19,13 @@ Documentation
 
 Compiling on 64-bit linux
 -------------------------
-```
+```bash
 cd src
 make -f ports/Makefile_Linux
 ```
 
 You can also install in `/usr/local/bin`:
-```
+```bash
 make -f ports/Makefile_Linux install
 ```
 
