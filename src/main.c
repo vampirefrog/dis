@@ -323,8 +323,8 @@ filetype_error:
 	top = (address) Malloc (bytes + 16);
 
 	if (read (handle, (char*)top, bytes) != bytes) {
-	close (handle);
-	err ("The file size is abnormal.\n");
+		close (handle);
+		err ("The file size is abnormal.\n");
 	}
 
 	close (handle);
@@ -376,9 +376,9 @@ main (int argc, char* argv[])
 	Available_text_end = (option_D ? BeginBSS : BeginDATA);
 
 	if (Head.bindinfo) {
-	eprintf ("This file is bound.\n"
-		 "Please unbind and generate source.\n");
-	return 1;
+		eprintf ("This file is bound.\n"
+			 "Please unbind and generate source.\n");
+		return 1;
 	}
 #endif	/* OSKDIS */
 
