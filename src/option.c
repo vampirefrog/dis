@@ -412,7 +412,7 @@ option_switch (int opt, char** argv)
 	break;
 	case 'o':
 	String_width = ck_atoi (optarg);
-	if( String_width < 1 || 80 < String_width )
+	if( String_width < 1 || 200 < String_width )
 		err ("The value is an invalid range (-o).\n");
 	break;
 	case 'p':
@@ -643,7 +643,7 @@ usage (int exitcode)
 	"	-m 68851	68851 Enable instruction (valid only when -m68020 is specified)\n"
 	"	-m 6888x[,ID]	Specify valid FPCP and its ID (68881/68882 ID=0-7, default 1)\n"
 	"	-n num		Minimum length to evaluate as a string. If not 0(Initial value = 3)\n"
-	"	-o num		Number of digits in character string area (1 … num … 80 initial value = 60)\n"
+	"	-o num		Number of digits in character string area (1 … num … 200 initial value = 60)\n"
 	"	-p		The program area in the data area is not discriminated\n"
 	"	-q[num]		Do not output message ([0]: normal 1: information about table is not output)\n"
 	"	-r		Add a hexadecimal comment to a character string\n"
