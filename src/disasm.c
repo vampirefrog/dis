@@ -1344,7 +1344,7 @@ private void op04(address ptr, disasm * code) {
 			SETSIZE();                      /* size が 0b11 なら tas */
 			setEA(code, &code->op1, ptr, (MPU_types & ~(M000 | M010)) ? ALL : DATA & CHANGE);
 			/* An 直接、PC 相対、即値は 68020 以降専用 */
-			if((ALL ^ (DATA & CHANGE)) & pow2[code->op1.ea])
+			if(code->op1.ea < 16 && (ALL ^ (DATA & CHANGE)) & pow2[code->op1.ea])
 				code->mputypes &= ~(M000 | M010);
 			return;
 		}
