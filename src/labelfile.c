@@ -216,14 +216,14 @@ work (address adrs, int attr, int pass, int line)
 {
 	if (pass == 0) {
 	if (!regist_label (adrs, attr))
-		eprintf ("??? %d行 address %x\n", line, adrs);
+		eprintf ("??? line %d address %x\n", line, adrs);
 	}
 	else {
 	if (isPROLABEL (attr)) {
 		if (Debug & BDEBUG)
 		printf ("work:prog %"PRI_UINTPTR"\n", (UINTPTR) adrs);
 		if (!analyze (adrs, ANALYZE_IGNOREFAULT))
-		eprintf ("\nAddress %x(labelfile Line %d)からはプログラムと見なせません.",
+		eprintf ("\nAddress %x(labelfile line %d) can not be regarded as a program.",
 				adrs, line);
 	}
 	else {
@@ -239,7 +239,7 @@ work (address adrs, int attr, int pass, int line)
 		break;
 		default:
 		if (!regist_label (adrs, attr))
-			eprintf ("\n??? labelfile %d行 address %x", line, adrs);
+			eprintf ("\n??? labelfile line %d address %x", line, adrs);
 		break;
 		}
 	}
