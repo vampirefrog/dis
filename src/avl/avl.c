@@ -43,9 +43,6 @@ avl_private void		avl_adjust_depth(avl_root_node *root, avl_node *node_ptr);
 avl_private avl_node		*avl_balance(avl_root_node *root, avl_node *node_ptr);
 avl_private inline void		avl_adjust_parent(avl_root_node *root, avl_node *node_ptr,
 						  avl_node *rotate_node);
-avl_private void	avl_print_tree(avl_root_node *root, avl_node *node_ptr, int level);
-avl_private int		avl_check_tree( avl_root_node* root, avl_node *node_ptr );
-
 
 #ifdef AVL_LIBRARY
   /* if compiled as library. */
@@ -65,12 +62,6 @@ avl_private int		avl_check_tree( avl_root_node* root, avl_node *node_ptr );
 #define	AVL_BALANCE(node_ptr)	((node_ptr)->right_depth - (node_ptr)->left_depth)
 
 
-#if 0
-static char avl_version[] = "Generic AVL-tree Library v0.1 (Copyright (C) 1991 K.Abe)";
-#endif
-
-
-
 /*
 
   ß“_‚Ì‰ñ“]‚Ì‰º¿‚¯ˆ—
@@ -353,27 +344,6 @@ void	(*print_func)( AVL_USERDATA* );
     return root;
 }
 
-
-/*
-
-  AVL-tree ‚ð‰ó‚·
-
-*/
-avl_public void	AVL_destroy_tree( root )
-avl_root_node	*root;
-{
-    avl_node	*node_ptr;
-    avl_node	*next;
-
-    for( node_ptr = root->avl_tree ; node_ptr != NULL ; node_ptr = next ) {
-	next = node_ptr->next;
-	(*( root->free_function ))( node_ptr->data );
-	free( node_ptr );
-    }
-    free( root );
-}
-
-
 /*
 
   AVL-tree ‚É‘}“ü‚·‚é
@@ -573,172 +543,6 @@ AVL_USERDATA	*data;
 	    return old_ptr;
     }
     return NULL;
-}
-
-
-/*
-
-  AVL-tree ‚©‚ç data ‚Ì‘O‚ðŒŸõ‚·‚é
-
-  data ‚Æ“¯‚¶ avl_node ‚ª‚ ‚ê‚Î‚»‚ê‚ð•Ô‚·
-
-  Œ©‚Â‚©‚ç‚È‚¢ê‡ NULL ‚ð•Ô‚·
-
-*/
-avl_public avl_node	*AVL_search_previous( root , data )
-avl_root_node	*root;
-AVL_USERDATA	*data;
-{
-    avl_node	*node_ptr , *old_ptr = NULL;
-    int		comp = 0;
-
-    node_ptr = root->avl_tree;
-    while( node_ptr != NULL ) {
-	old_ptr = node_ptr;
-	comp = AVL_COMPARE( data , node_ptr->data );
-	if( comp < 0 )
-	    node_ptr = node_ptr->left;
-	else if( comp > 0 )
-	    node_ptr = node_ptr->right;
-	else
-	    return node_ptr;	/* found */
-    }
-    /* not found */
-    if( old_ptr ) {
-	if( comp > 0 )
-	    return old_ptr;
-	else
-	    return old_ptr->previous;
-    }
-    return NULL;
-}
-
-
-/*
-
-  AVL-tree ‚ð•\Ž¦‚·‚é
-
-*/
-avl_public void		AVL_print_tree( root )
-avl_root_node	*root;
-{
-    avl_print_tree( root , root->avl_tree , 0 );
-}
-
-
-avl_private void	avl_print_tree( root , node_ptr , level )
-avl_root_node	*root;
-avl_node	*node_ptr;
-int		level;
-{
-    int		i;
-
-    if( node_ptr == NULL )
-	return;
-    avl_print_tree( root , node_ptr->right , level + 1 );
-    for( i = level * 4 ; i > 0 ; i-- )
-	putchar( ' ' );
-    (*( root->print_function ))( node_ptr->data );
-    printf( "(%d,%d)\n" , node_ptr->left_depth , node_ptr->right_depth );
-
-    avl_print_tree( root , node_ptr->left , level + 1 );
-}
-
-
-#if 0
-/*
-
-  AVL-tree ‚ð•\Ž¦‚·‚é ‚»‚Ì‚Q
-
-*/
-avl_public void		AVL_print_tree2( avl_root_node *root )
-{
-    avl_node	*node_ptr;
-
-    printf( "\n" "--------\n" );
-
-    for( node_ptr = AVL_get_max( root ); node_ptr != NULL;
-	 node_ptr = AVL_previous( node_ptr ) ) {
-
-	int level;
-	avl_node  *nptr = node_ptr;
-
-	/* node_ptr ‚ÌƒŒƒxƒ‹‚ð’²‚×‚é */
-	for( level = 0; nptr != NULL; level++ )
-	    nptr = nptr->parent;
-
-	for( level *= 2; level > 0; level-- )
-	    putchar(' ');
-	(*( root->print_function ))( node_ptr->data );
-	printf( "(%d,%d)\n", node_ptr->left_depth, node_ptr->right_depth );
-    }
-}
-#endif
-
-
-avl_public void		AVL_check_tree( root )
-avl_root_node	*root;
-{
-    avl_check_tree( root , root->avl_tree );
-}
-
-
-avl_private int	avl_check_tree( root , node_ptr )
-avl_root_node	*root;
-avl_node	*node_ptr;
-{
-    int		left_depth , right_depth;
-
-    if( node_ptr == NULL )
-	return 0;
-
-    left_depth = avl_check_tree( root , node_ptr->left );
-    right_depth = avl_check_tree( root , node_ptr->right );
-    if( AVL_BALANCE( node_ptr ) != 0 &&
-        AVL_BALANCE( node_ptr ) != 1 &&
-        AVL_BALANCE( node_ptr ) != -1 ) {
-	fputs( "AVL_check_tree: tree not balanced\n" , stderr );
-	exit( 1 );
-    }
-    if( ( node_ptr->left  && AVL_COMPARE( node_ptr->left->data  , node_ptr->data ) >= 0 ) ||
-        ( node_ptr->right && AVL_COMPARE( node_ptr->data , node_ptr->right->data ) >= 0 ) ) {
-	fputs( "AVL_check_tree: order error\n" , stderr );
-	if( node_ptr->left ) {
-	    fputs( "left node" , stderr );
-	    (*( root->print_function ))( node_ptr->left->data );
-	}
-	fputc( ' ' , stderr );
-	(*( root->print_function ))( node_ptr->data );
-	fputc( ' ' , stderr );
-	if( node_ptr->right ) {
-	    fputs( "right node" , stderr );
-	    (*( root->print_function ))( node_ptr->right->data );
-	}
-	fputc( '\n' , stderr );
-	AVL_print_tree( root );
-	exit(1);
-    }
-    if( node_ptr->left_depth != left_depth || node_ptr->right_depth != right_depth ) {
-	fputs( "AVL_check_tree: depth error\n" , stderr );
-	exit( 1 );
-    }
-    if( ( node_ptr->left  && node_ptr->left->parent != node_ptr )
-     || ( node_ptr->right && node_ptr->right->parent != node_ptr ) ) {
-	fputs( "AVL_check_tree: child error\n" , stderr );
-	exit( 1 );
-    }
-    if( node_ptr->parent == NULL ) {
-	if( root->avl_tree != node_ptr ) {
-	    fputs( "AVL_check_tree: root node mismatch\n" , stderr );
-	    exit( 1 );
-	}
-    } else {
-	if( node_ptr->parent->left != node_ptr && node_ptr->parent->right != node_ptr ) {
-	    fputs( "AVL_check_tree: parent error\n" , stderr );
-	    exit( 1 );
-	}
-    }
-    return( left_depth > right_depth ? left_depth : right_depth ) + 1;
 }
 
 /* EOF */

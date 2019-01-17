@@ -90,15 +90,10 @@ avl_public avl_root_node	*AVL_create_tree( int (*compare_function)
 					 ( AVL_USERDATA* , AVL_USERDATA* ) ,
 					  void (*free_function)( AVL_USERDATA* ) ,
 					  void (*print_function)( AVL_USERDATA* ) );
-avl_public void		AVL_destroy_tree(avl_root_node *root);
 avl_public avl_node	*AVL_insert(avl_root_node *root, AVL_USERDATA *data);
 avl_public void		AVL_delete(avl_root_node *root, avl_node *delete_node);
 avl_public avl_node	*AVL_search(avl_root_node *root, AVL_USERDATA *data);
 avl_public avl_node	*AVL_search_next(avl_root_node *root, AVL_USERDATA *data);
-avl_public avl_node	*AVL_search_previous(avl_root_node *root, AVL_USERDATA *data);
-avl_public void		AVL_print_tree(avl_root_node *root);
-avl_public void		AVL_check_tree(avl_root_node *root);
-
 
 #ifndef AVL_NOMACRO
 #define	AVL_get_data(node_ptr)	((node_ptr)->data)
