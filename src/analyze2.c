@@ -61,7 +61,7 @@ research_data (void)
 		disasm code;
 
 		if (!option_y
-		 || (!((ULONG)nlabel & 1) &&
+		 || (!((UINTPTR)nlabel & 1) &&
 		 ( (dis (nlabel - 2 + Ofst, &code, &dummy),
 			   (code.flag != OTHER && code.flag != UNDEF))
 		|| (dis (nlabel - 4 + Ofst, &code, &dummy) == 4
@@ -102,8 +102,8 @@ analyze_data (void)
 
 	do {
 	data_from = next_datlabel (data_to)->label;
-	data_to   = (address) min ((ULONG) next_prolabel (data_from)->label,
-				   (ULONG) BeginBSS);
+	data_to   = (address) min ((UINTPTR) next_prolabel (data_from)->label,
+				   (UINTPTR) BeginBSS);
 	charout ('#');
 
 	/* アドレス依存のデータがあれば、そのアドレスを登録する */
@@ -113,7 +113,7 @@ analyze_data (void)
 #ifdef	DEBUG
 		printf ("depend_address %x\n", (address) peekl (adrs + Ofst));
 #endif
-		regist_label ((address) peekl (adrs + Ofst), DATLABEL | UNKNOWN);
+		regist_label ((address) (UINTPTR) peekl (adrs + Ofst), DATLABEL | UNKNOWN);
 	}
 
 	/* rts の次のアドレスを登録する */
@@ -165,7 +165,7 @@ search_adrs_table (void)
 		address labeltop;
 		int count;
 
-		pc = (address) min((ULONG) nearadrs (pc), (ULONG) nlabel);
+		pc = (address) min((UINTPTR) nearadrs (pc), (UINTPTR) nlabel);
 #ifdef DEBUG
 		printf ("chk2(%x)", pc);
 #endif
@@ -181,7 +181,7 @@ search_adrs_table (void)
 		printf ("* found address table at %6x %d\n", pc - count * 4, count);
 #endif
 		for (i = 0; i < count; i++) {
-			address label = (address) peekl (labeltop + i * 4 + Ofst);
+			address label = (address) (UINTPTR) peekl (labeltop + i * 4 + Ofst);
 			analyze (label, (option_i ? ANALYZE_IGNOREFAULT : ANALYZE_NORMAL));
 		}
 		}
@@ -202,7 +202,7 @@ search_adrs_table (void)
 extern void
 analyze_idata (void)
 {
-	address offset = (address) (Top - (ULONG) Head.base + (ULONG) HeadOSK.idata);
+	address offset = (address) (Top - (UINTPTR) Head.base + (UINTPTR) HeadOSK.idata);
 
 	BeginDATA = BeginBSS + peekl (offset + 0);
 	regist_label (BeginDATA, DATLABEL | UNKNOWN);
@@ -232,12 +232,12 @@ analyze_irefs (void)
 	UWORD base;
 	UWORD cnt;
 	} *offset;
-	ULONG* idatp = (ULONG*) (Top - (ULONG) Head.base + (ULONG) HeadOSK.idata);
+	ULONG* idatp = (ULONG*) (Top - (UINTPTR) Head.base + (UINTPTR) HeadOSK.idata);
 
-	offset = (struct REFSTBL*) (Top - (ULONG) Head.base + (ULONG) HeadOSK.irefs);
+	offset = (struct REFSTBL*) (Top - (UINTPTR) Head.base + (UINTPTR) HeadOSK.irefs);
 
 	while (ofset->cnt) {	/* コードポインタ */
-	ULONG wk = BeginBSS + ((ULONG) ofset->base << 16);
+	ULONG wk = BeginBSS + ((UINTPTR) ofset->base << 16);
 	UWORD* p = (UWORD*) &ofset[1];
 	int i;
 
@@ -255,7 +255,7 @@ analyze_irefs (void)
 	}
 	offset++;
 	while (ofset->cnt) {	/* データポインタ */
-	ULONG wk = BeginBSS + ((ULONG) ofset->base << 16);
+	ULONG wk = BeginBSS + ((UINTPTR) ofset->base << 16);
 	UWORD* p = (UWORD*) &ofset[1];
 	int i;
 

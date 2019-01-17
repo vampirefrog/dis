@@ -464,10 +464,10 @@ option_switch (int opt, char** argv)
 		p = strchr (optarg, ',');
 		if (p) {
 		*p++ = '\0';
-		Base = (address) atox (optarg);
-		Exec = (address) atox (p);
+		Base = (address) (UINTPTR)atox (optarg);
+		Exec = (address) (UINTPTR)atox (p);
 		} else
-		Exec = Base = (address) atox (optarg);
+		Exec = Base = (address) (UINTPTR)atox (optarg);
 #ifndef	__LIBC__
 		Mfree (new_optarg);
 #endif

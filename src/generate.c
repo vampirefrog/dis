@@ -200,7 +200,7 @@ static INLINE char *strcpy2(char *dst, char *src) {
 */
 
 static INLINE boolean check_displacement(address pc, disasm * code) {
-	long dist = (ULONG) code->jmp - (ULONG) pc;
+	long dist = (UINTPTR) code->jmp - (UINTPTR) pc;
 	unsigned char c = code->opecode[0];
 
 	/* bra, bsr, bcc */
@@ -811,7 +811,7 @@ private address datagen(address pc, address pcend, opesize size) {
 				pc = next_adrs;
 			}
 			output_opecode(PSEUDO DC_L);
-			label_op_out((address) peekl(next_adrs + Ofst));
+			label_op_out((address) (UINTPTR) peekl(next_adrs + Ofst));
 			newline(next_adrs);
 			pc += 4;
 		} else {
@@ -1384,12 +1384,12 @@ private void relgen(address pc, address pcend) {
 		int dif = (int)(signed short)peekw(pc + Ofst);
 		char *p;
 
-		if((LONG) (pc0 + dif) < (LONG) BeginTEXT) {
+		if((INTPTR) (pc0 + dif) < (INTPTR) BeginTEXT) {
 			make_proper_symbol(bufp, BeginTEXT);
 			p = strend(bufp);
 			*p++ = '-';
 			p = itox6d(p, BeginTEXT - (pc0 + dif));
-		} else if((LONG) (pc0 + dif) > (LONG) Last) {
+		} else if((INTPTR) (pc0 + dif) > (INTPTR) Last) {
 			make_proper_symbol(bufp, Last);
 			p = strend(bufp);
 			*p++ = '+';
@@ -1442,12 +1442,12 @@ private void rellonggen(address pc, address pcend) {
 		int dif = (int)peekl(pc + Ofst);
 		char *p;
 
-		if((LONG) (pc0 + dif) < (LONG) BeginTEXT) {
+		if((INTPTR) (pc0 + dif) < (INTPTR) BeginTEXT) {
 			make_proper_symbol(bufp, BeginTEXT);
 			p = strend(bufp);
 			*p++ = '-';
 			p = itox6d(p, BeginTEXT - (pc0 + dif));
-		} else if((LONG) (pc0 + dif) > (LONG) Last) {
+		} else if((INTPTR) (pc0 + dif) > (INTPTR) Last) {
 			make_proper_symbol(bufp, Last);
 			p = strend(bufp);
 			*p++ = '+';
@@ -1461,7 +1461,7 @@ private void rellonggen(address pc, address pcend) {
 
 		/* 相対テーブルも -x でコメントを出力する */
 		if(option_x)
-			byteout_for_xoption(pc, sizeof(LONG), buf);
+			byteout_for_xoption(pc, sizeof(INTPTR), buf);
 
 		outputa(buf);
 		newline(pc);
@@ -1488,19 +1488,19 @@ private void zgen(address pc, address pcend) {
 
 	for(store = pc + Ofst; store <= limit; store += SIZEOF_ULONG) {
 		char work[128];
-		address label = (address) peekl(store);
+		address label = (address) (UINTPTR) peekl(store);
 		char *p;
 
-		if((LONG) label < (LONG) BeginTEXT) {
+		if((INTPTR) label < (INTPTR) BeginTEXT) {
 			make_proper_symbol(work, BeginTEXT);
 			p = strend(work);
 			*p++ = '-';
 			itox6d(p, (ULONG) (BeginTEXT - label));
-		} else if((LONG) label > (LONG) Last) {
+		} else if((INTPTR) label > (INTPTR) Last) {
 			make_proper_symbol(work, Last);
 			p = strend(work);
 			*p++ = '+';
-			itox6d(p, (ULONG) (label - Last));
+			itox6d(p, (INTPTR) (label - Last));
 		} else
 			make_proper_symbol(work, label);
 
@@ -1940,10 +1940,10 @@ private void bssgen(address pc, address nlabel, opesize size) {
 	ULONG byte;
 
 	charout('$');
-	nlabel = (address) min((ULONG) nlabel, (ULONG) Last);
+	nlabel = (address) min((INTPTR) nlabel, (INTPTR) Last);
 	byte = nlabel - pc;
 
-	if((LONG) nlabel >= 0) {
+	if((INTPTR) nlabel >= 0) {
 		if(size == WORDSIZE && byte == 2)
 			output_opecode(PSEUDO DS_W "1");
 		else if(size == LONGSIZE && byte == 4)
@@ -2031,12 +2031,12 @@ private void labelchange(disasm * code, operand * op) {
 				break;
 		}
 
-		if((LONG) op->opval < (LONG) BeginTEXT) {
+		if((INTPTR) op->opval < (INTPTR) BeginTEXT) {
 			arg1 = BeginTEXT;
-			shift = (LONG) op->opval - (LONG) BeginTEXT;
-		} else if((ULONG) op->opval > (ULONG) Last) {
+			shift = (INTPTR) op->opval - (INTPTR) BeginTEXT;
+		} else if((UINTPTR) op->opval > (UINTPTR) Last) {
 			arg1 = Last;
-			shift = (ULONG) op->opval - (ULONG) Last;
+			shift = (UINTPTR) op->opval - (UINTPTR) Last;
 		} else {
 			lblbuf *label_ptr = search_label(op->opval);
 
@@ -2088,12 +2088,12 @@ private void labelchange(disasm * code, operand * op) {
 	if(op->labelchange2 && op->opval2 != (address) - 1 && INPROG(op->opval2, op->eaadrs2)) {
 		char *ptr;
 
-		if((LONG) op->opval2 < (LONG) BeginTEXT) {
+		if((INTPTR) op->opval2 < (INTPTR) BeginTEXT) {
 			arg1 = BeginTEXT;
-			shift = (LONG) op->opval2 - (LONG) BeginTEXT;
-		} else if((ULONG) op->opval2 > (ULONG) Last) {
+			shift = (INTPTR) op->opval2 - (INTPTR) BeginTEXT;
+		} else if((UINTPTR) op->opval2 > (UINTPTR) Last) {
 			arg1 = Last;
-			shift = (ULONG) op->opval2 - (ULONG) Last;
+			shift = (UINTPTR) op->opval2 - (UINTPTR) Last;
 		} else {
 			lblbuf *label_ptr = search_label(op->opval2);
 
@@ -2156,7 +2156,7 @@ private void label_line_out(address adrs, lblmode mode) {
 
 	/* シンボル名が無ければ Lxxxxxx の形式で出力する */
 	buf[0] = Label_first_char;
-	add_colon(itox6_without_0supress(&buf[1], (ULONG) adrs), 0);
+	add_colon(itox6_without_0supress(&buf[1], (UINTPTR) adrs), 0);
 	outputa(buf);
 	newline(adrs);
 }
@@ -2228,12 +2228,12 @@ extern void make_proper_symbol(char *buf, address adrs) {
 	address arg1;
 	LONG shift;
 
-	if((LONG) adrs < (LONG) BeginTEXT) {    /* must be LONG, not ULONG */
+	if((INTPTR) adrs < (INTPTR) BeginTEXT) {    /* must be LONG, not ULONG */
 		arg1 = BeginTEXT;
-		shift = (LONG) adrs - (ULONG) BeginTEXT;
-	} else if((ULONG) adrs > (ULONG) Last) {
+		shift = (INTPTR) adrs - (UINTPTR) BeginTEXT;
+	} else if((UINTPTR) adrs > (UINTPTR) Last) {
 		arg1 = Last;
-		shift = (ULONG) adrs - (ULONG) Last;
+		shift = (UINTPTR) adrs - (UINTPTR) Last;
 	} else {
 		lblbuf *lblptr = search_label(adrs);
 
@@ -2274,7 +2274,7 @@ extern char *make_symbol(char *ptr, address adrs, LONG sft) {
 		ptr = strend(ptr);
 	} else {
 		*ptr++ = Label_first_char;
-		ptr = itox6_without_0supress(ptr, (ULONG) adrs);
+		ptr = itox6_without_0supress(ptr, (UINTPTR) adrs);
 	}
 
 	if(sft == 0)
@@ -2702,14 +2702,14 @@ private void wgen(address pc, address pcend) {
 	for(store = pc + Ofst; store + 2 <= pcend + Ofst; store += 2) {
 		address label = (int)*(signed short *)store;
 
-		if((LONG) label < (LONG) BeginTEXT) {
+		if((INTPTR) label < (UINTPTR) BeginTEXT) {
 			make_proper_symbol(buf, BeginTEXT);
 			strcat(buf, "-");
-			itox6d(buf + strlen(buf), (ULONG) (BeginTEXT - label));
-		} else if((LONG) label > (LONG) Last) {
+			itox6d(buf + strlen(buf), (UINTPTR) (BeginTEXT - label));
+		} else if((INTPTR) label > (INTPTR) Last) {
 			make_proper_symbol(work, Last);
 			strcat(buf, "+");
-			itox6d(buf + strlen(buf), (ULONG) (label - Last));
+			itox6d(buf + strlen(buf), (UINTPTR) (label - Last));
 		} else
 			make_proper_symbol(work, label);
 

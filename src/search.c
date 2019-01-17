@@ -84,7 +84,7 @@ is_string (address from, address end, address* newend, int str_min)
 		if (from + str_min < store - Ofst) {
 			while (store - Ofst < end && !*store)
 			store++;
-			*newend = (address) min ((ULONG) (store - Ofst), (ULONG) end);
+			*newend = (address) min ((UINTPTR) (store - Ofst), (UINTPTR) end);
 			return TRUE;
 		}
 		return FALSE;
@@ -95,7 +95,7 @@ is_string (address from, address end, address* newend, int str_min)
 	}
 
 	if (from + str_min <= store - Ofst) {
-	*newend = (address) min ((ULONG) (store - Ofst), (ULONG) end);
+	*newend = (address) min ((UINTPTR) (store - Ofst), (UINTPTR) end);
 	return TRUE;
 	}
 	return FALSE;
@@ -119,7 +119,7 @@ check_data_area (address pc, address nlabel, int str_min)
 	while (pc < nlabel) {
 	address ltemp, nlabel2;
 
-	nlabel2 = ltemp = (address) min ((ULONG) nearadrs (pc), (ULONG) nlabel);
+	nlabel2 = ltemp = (address) min ((UINTPTR) nearadrs (pc), (UINTPTR) nlabel);
 	while (pc < nlabel2) {
 		if (is_string (pc, ltemp, &ltemp, str_min)) {
 		foundstr (pc, ltemp);
@@ -128,7 +128,7 @@ check_data_area (address pc, address nlabel, int str_min)
 			ltemp += 4;
 		regist_label (ltemp, DATLABEL | UNKNOWN);
 		pc = ltemp;
-		ltemp = (address) min ((ULONG) nearadrs (pc), (ULONG) nlabel);
+		ltemp = (address) min ((UINTPTR) nearadrs (pc), (UINTPTR) nlabel);
 		}
 		else
 		pc = nlabel2;

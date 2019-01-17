@@ -13,20 +13,21 @@
 #error You lose. This file can be compiled only by GNU-C compiler version 2.
 #endif
 
+#include <stdint.h>
 
 typedef union {
 	struct {
-	unsigned long hi;
-	unsigned long lo;
+	uint32_t hi;
+	uint32_t lo;
 	} ul;
 	double d;
 } quadword;
 
 typedef union {
 	struct {
-	unsigned long hi;
-	unsigned long mi;
-	unsigned long lo;
+	uint32_t hi;
+	uint32_t mi;
+	uint32_t lo;
 	} ul;
 	unsigned char uc[12];
 } packed_decimal;

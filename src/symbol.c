@@ -73,7 +73,7 @@ extern int
 output_symbol_table (const char* op_equ, const char* op_xdef, const char* colon)
 {
 	char* ptr = (char*)(Top + Head.text + Head.data + Head.offset);
-	ULONG end = (ULONG)ptr + Head.symbol
+	UINTPTR end = (UINTPTR)ptr + Head.symbol
 		  - (sizeof (UWORD) + sizeof (address) + 2);
 	int out_xdef = (Output_Symbol == 2);
 	int count = 0;
@@ -81,13 +81,13 @@ output_symbol_table (const char* op_equ, const char* op_xdef, const char* colon)
 	if ((UINTPTR)ptr & 1 || !Output_Symbol)
 	return count;
 
-	while ((ULONG)ptr <= end) {
+	while ((UINTPTR)ptr <= end) {
 	UWORD type;
 	address adrs;
 
 	type = peekw (ptr);
 	ptr += sizeof (UWORD);
-	adrs = (address) peekl (ptr);
+	adrs = (address) (UINTPTR) peekl (ptr);
 	ptr += sizeof (address);
 
 	if (*ptr && *ptr != (char)'*') {
@@ -99,7 +99,7 @@ output_symbol_table (const char* op_equ, const char* op_xdef, const char* colon)
 		/* 「xxx:: .equ $nn」の形式で出力する */
 				  /* TAB-2 */
 		tab = (strlen (ptr) < (8-2)) ? "\t" : "";
-		itoxd (buf, (ULONG) adrs, 8);
+		itoxd (buf, (UINTPTR) adrs, 8);
 		outputf ("%s%s%s%s%s" CR, ptr, colon, tab, op_equ, buf);
 		count++;
 		break;
@@ -160,19 +160,19 @@ extern void
 make_symtable (void)
 {
 	char* ptr = (char*)(Top + Head.text + Head.data + Head.offset);
-	ULONG end = (ULONG)ptr + Head.symbol
+	UINTPTR end = (UINTPTR)ptr + Head.symbol
 		  - (sizeof (UWORD) + sizeof (address) + 2);
 
 	if ((UINTPTR)ptr & 1)
 	return;
 
-	while ((ULONG)ptr <= end) {
+	while ((UINTPTR)ptr <= end) {
 	UWORD type;
 	address adrs;
 
 	type = peekw (ptr);
 	ptr += sizeof (UWORD);
-	adrs = (address) peekl (ptr);
+	adrs = (address) (UINTPTR) peekl (ptr);
 	ptr += sizeof (address);
 
 	if (!*ptr) {

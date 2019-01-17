@@ -163,11 +163,11 @@ analyze (address start, analyze_mode mode)
 	if (Reason_verbose)
 		eprintf ("\n%06x : PC is dependent on address\t", pc);
 	FALSEret;
-	} else if ((ULONG)pc & 1) {
+	} else if ((UINTPTR)pc & 1) {
 	if (Reason_verbose)
 		eprintf ("\n%06x : If PC is odd\t", pc);
 	FALSEret;
-	} else if (((ULONG)pc & 1) != 0 || *(LONG*)store == 0) {
+	} else if (((UINTPTR)pc & 1) != 0 || *(LONG*)store == 0) {
 	if (Reason_verbose)
 		eprintf ("\n%06x : The PC starts with ori.b #0,d0\t", pc);
 	FALSEret;
@@ -210,7 +210,7 @@ analyze (address start, analyze_mode mode)
 	address previous_opval, previous_pc;
 
 	if (neardepend == pc) {				/* アドレス依存チェック */
-		not_program (start, (address) min((ULONG) pc, (ULONG) limit));
+		not_program (start, (address) min((UINTPTR) pc, (UINTPTR) limit));
 		if (Reason_verbose)
 		eprintf ("\n%06x : PC is dependent on address\t", pc);
 		FALSEret;
@@ -218,7 +218,7 @@ analyze (address start, analyze_mode mode)
 
 	if (*(UWORD*)store == 0) {			/* ori.b #??,d0 チェック */
 		if (orib >= 2 || *(UWORD*)(store + 2) == 0) {
-		not_program (start, (address) min ((ULONG) pc, (ULONG) limit));
+		not_program (start, (address) min ((UINTPTR) pc, (UINTPTR) limit));
 		if (Reason_verbose)
 			eprintf ((orib >= 2) ? "\n%06x : ori.b #??,d0 are consecutive\t"
 					 : "\n%06x : I found ori.b #0,d0\t", pc);
@@ -270,8 +270,8 @@ analyze (address start, analyze_mode mode)
 	/* add '90 Sep 24 */
 	if (Available_text_end < pc) {
 		if (Reason_verbose)
-		eprintf ("\n%06x : PC が有効なセクションを外れた\t", pc);
-		not_program (start, (address) min ((ULONG) previous_pc, (ULONG) limit));
+		eprintf ("\n%06x : The PC is out of a valid section\t", pc);
+		not_program (start, (address) min ((UINTPTR) previous_pc, (UINTPTR) limit));
 		FALSEret;
 	}
 
@@ -294,7 +294,7 @@ analyze (address start, analyze_mode mode)
 		else {
 		if (Reason_verbose)
 			eprintf ("\n%06x : アドレス依存のオペランドが正当でない\t", previous_pc);
-		not_program (start, (address) min ((ULONG) previous_pc, (ULONG) limit));
+		not_program (start, (address) min ((UINTPTR) previous_pc, (UINTPTR) limit));
 		FALSEret;
 		}
 	}
@@ -313,7 +313,7 @@ analyze (address start, analyze_mode mode)
 		if (Reason_verbose)
 		eprintf ("\n%06x : 未定義命令(%04x %04x)\t", previous_pc,
 			peekw (previous_pc + Ofst), peekw (previous_pc + Ofst + 2));
-		not_program (start, (address) min((ULONG) previous_pc, (ULONG) limit));
+		not_program (start, (address) min((UINTPTR) previous_pc, (UINTPTR) limit));
 		FALSEret;
 	case OTHER:
 		break;
@@ -393,7 +393,7 @@ limitadrs (address adrs)
 	printf ("lmt(%x)=%x\n", adrs, lptr->label);
 #endif
 
-	return (address) min ((ULONG)lptr->label, (ULONG)Available_text_end);
+	return (address) min ((UINTPTR)lptr->label, (UINTPTR)Available_text_end);
 }
 
 
@@ -417,7 +417,7 @@ branch_job (address opval, address start, address pc, address pre_pc,
 	return TRUE;
 
 	/* 奇数アドレスへの分岐があればプログラム領域ではない */
-	if ((LONG)opval & 1) {
+	if ((UINTPTR)opval & 1) {
 	if (Disasm_AddressErrorUndefined == FALSE) {
 		/* -j: 奇数アドレスへの分岐を未定義命令と「しない」 */
 
@@ -427,7 +427,7 @@ branch_job (address opval, address start, address pc, address pre_pc,
 	}
 	ch_lblmod (start, DATLABEL | UNKNOWN | FORCE);
 	bra_to_odd (pre_pc, opval);
-	not_program (start, (address)min ((ULONG)pre_pc, (ULONG)limit));
+	not_program (start, (address)min ((UINTPTR)pre_pc, (UINTPTR)limit));
 	return FALSE;
 	}
 
@@ -445,7 +445,7 @@ branch_job (address opval, address start, address pc, address pre_pc,
 		printf ("falseret : %x falseret\n", pc);
 #endif
 	ch_lblmod (start, DATLABEL | UNKNOWN | FORCE);
-	not_program (start, (address)min ((ULONG)pc, (ULONG)limit));
+	not_program (start, (address)min ((UINTPTR)pc, (UINTPTR)limit));
 	return FALSE;
 	}
 
@@ -585,7 +585,7 @@ z_table (address table)
 	regist_label (table, DATLABEL | ZTABLE);
 
 	while (ptr + 4 <= tableend) {
-	address label = (address) peekl (ptr + Ofst);
+	address label = (address) (UINTPTR) peekl (ptr + Ofst);
 
 	regist_label (label, DATLABEL | UNKNOWN);
 #ifdef DEBUG

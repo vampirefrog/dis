@@ -12,6 +12,7 @@
 #define	ETC_H
 
 #include <stdio.h>		/* for __byte_swap_* */
+#include <stdint.h>
 
 #include "global.h"
 
@@ -75,30 +76,30 @@ extern ULONG	max (ULONG, ULONG);
 
 
 #ifdef __BIG_ENDIAN__
-#define peekw(p) (*(unsigned short*) (p))
-#define peekl(p) (*(unsigned long *) (p))
+#define peekw(p) (*(uint16_t *) (p))
+#define peekl(p) (*(uint32_t *) (p))
 
 #else /* __LITTLE_ENDIAN__ */
 
 #ifdef __byte_swap_word
-#define peekw(p) ((unsigned short) __byte_swap_word (*(unsigned short*) (p)))
+#define peekw(p) ((uint16_t) __byte_swap_word (*(uint16_t*) (p)))
 #else
-static INLINE unsigned short
+static INLINE uint16_t
 peekw (const void* ptr)
 {
-	const unsigned char* p = ptr;
+	const uint8_t* p = ptr;
 
 	return (p[0] << 8) + p[1];
 }
 #endif
 
 #ifdef __byte_swap_long
-#define peekl(p) ((unsigned long) __byte_swap_long (*(unsigned long*) (p)))
+#define peekl(p) ((uint32_t) __byte_swap_long (*(uint32_t*) (p)))
 #else
-static INLINE unsigned long
+static INLINE uint32_t
 peekl (const void* ptr)
 {
-	const unsigned char* p = ptr;
+	const uint8_t* p = ptr;
 
 	return (p[0] << 24) + (p[1] << 16) + (p[2] << 8) + p[3];
 }

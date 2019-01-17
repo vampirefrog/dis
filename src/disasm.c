@@ -584,7 +584,7 @@ INLINE static void set18(operand * op, int num) {
 INLINE static void setrelative(char *optr, int disp, address * opval) {
 	*opval = PC + 2 + (WORD) disp;
 	IfNeedStr {
-		itox8d(optr, (LONG) * opval);
+		itox8d(optr, (UINTPTR)*opval);
 	}
 }
 
@@ -593,7 +593,7 @@ INLINE static void setrelative(char *optr, int disp, address * opval) {
 INLINE static void setrelative4(char *optr, int disp, address * opval) {
 	*opval = PC + 4 + (WORD) disp;
 	IfNeedStr {
-		itox8d(optr, (LONG) * opval);
+		itox8d(optr, (UINTPTR) * opval);
 	}
 }
 
@@ -602,7 +602,7 @@ INLINE static void setrelative4(char *optr, int disp, address * opval) {
 INLINE static void setlongrelative(char *optr, int disp, address * opval) {
 	*opval = PC + 2 + disp;
 	IfNeedStr {
-		itox8d(optr, (LONG) * opval);
+		itox8d(optr, (UINTPTR) * opval);
 	}
 }
 
@@ -705,7 +705,7 @@ private void op00(address ptr, disasm * code) {
 
 				/* addi/subi で 1 <= imm <= 8 なら  */
 				/* imm にサイズを付ける(最適化対策) */
-				if((BYTE1 == 4 || BYTE1 == 6) && ((ULONG) code->op1.opval - 1) <= 7)
+				if((BYTE1 == 4 || BYTE1 == 6) && ((UINTPTR) code->op1.opval - 1) <= 7)
 					addsize(code->op1.operand, code->size);
 			}
 		}
@@ -800,7 +800,7 @@ private void op00(address ptr, disasm * code) {
 				itox2d(code->op1.operand + 1, BYTE4);
 			}
 			code->op1.ea = IMMED;
-			code->op1.opval = (address) (ULONG) BYTE4;
+			code->op1.opval = (address) (UINTPTR) BYTE4;
 			code->bytes += 2;
 			setEA(code, &code->op2, ptr, CONTROL);
 		}
@@ -1498,7 +1498,7 @@ private void op07(address ptr, disasm * code) {
 		code->opflags += FLAG_NEED_COMMENT;
 	}
 	code->op1.ea = IMMED;
-	code->op1.opval = (address) (ULONG) BYTE2;
+	code->op1.opval = (address) (UINTPTR) BYTE2;
 	setDn(&code->op2, BYTE1 >> 1);
 }
 
@@ -1925,12 +1925,12 @@ static const unsigned char ExtensionFormat[128] = {
 
 /* move16用 */
 INLINE private void setAbsLong(disasm * code, operand * op, address ptr) {
-	op->opval = (address) peekl(ptr + code->bytes);
+	op->opval = (address) (UINTPTR) peekl(ptr + code->bytes);
 
 	IfNeedStr {
 		char *p = op->operand;
 		*p++ = '(';
-		p = itox8d(p, (LONG) op->opval);
+		p = itox8d(p, (UINTPTR) op->opval);
 		*p++ = ')';
 		*p = '\0';
 	}
@@ -2992,7 +2992,7 @@ private void addsubope(address ptr, disasm * code, const char *opname) {
 			if(Disasm_MnemonicAbbreviation) {
 				/* adda/suba #imm で 1 <= imm <= 8 なら */
 				/* imm にサイズを付ける(最適化対策) */
-				if(code->op1.ea == IMMED && ((ULONG) code->op1.opval - 1) <= 7)
+				if(code->op1.ea == IMMED && ((UINTPTR) code->op1.opval - 1) <= 7)
 					addsize(code->op1.operand, code->size);
 			} else
 				strcat(code->opecode, "a");
@@ -3168,22 +3168,22 @@ private void setIMD(disasm * code, operand * op, address ptr, opesize size) {
 				UNDEFINED();
 				return;
 			}
-			op->opval = (address) (ULONG) BYTE4;
+			op->opval = (address) (UINTPTR) BYTE4;
 			break;
 		case WORDSIZE:
 			code->bytes += 2;
-			op->opval = (address) (ULONG) WORD2;
+			op->opval = (address) (UINTPTR) WORD2;
 			IfNeedStr {
 				*optr++ = '#';
-				itox4d(optr, (LONG) op->opval);
+				itox4d(optr, (UINTPTR) op->opval);
 			}
 			break;
 		case LONGSIZE:
 			code->bytes += 4;
-			op->opval = (address) peekl(ptr + 2);
+			op->opval = (address) (UINTPTR) peekl(ptr + 2);
 			IfNeedStr {
 				*optr++ = '#';
-				itox8d(optr, (LONG) op->opval);
+				itox8d(optr, (UINTPTR) op->opval);
 			}
 			break;
 		default:                                /* reduce warning message */
@@ -3265,7 +3265,7 @@ private void setAnDisp(disasm * code, operand * op, int regno, int disp) {
 
 */
 #define ODDCHECK \
-	if (Disasm_AddressErrorUndefined && (long)op->opval & 1 && \
+	if (Disasm_AddressErrorUndefined && (UINTPTR)op->opval & 1 && \
 		code->size2 != BYTESIZE && code->size2 != UNKNOWN) { \
 		UNDEFINED(); return; \
 	}
@@ -3296,7 +3296,7 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 		switch (eareg) {
 			case 0:                 /* (abs).w AbShort */
 				d16 = (WORD) peekw(ptr + code->bytes);
-				op->opval = (address) (LONG) d16;
+				op->opval = (address) (UINTPTR) d16;
 				ODDCHECK;
 				IfNeedStr {
 					*p++ = '(';
@@ -3315,13 +3315,13 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 				code->bytes += 2;
 				return;
 			case 1:                 /* (abs).l AbLong */
-				op->opval = (address) peekl(ptr + code->bytes);
+				op->opval = (address) (UINTPTR) peekl(ptr + code->bytes);
 				ODDCHECK;
 				IfNeedStr {
 					*p++ = '(';
-					p = itox8d(p, (LONG) op->opval);
+					p = itox8d(p, (UINTPTR) op->opval);
 					*p++ = ')';
-					if((LONG) (WORD) (LONG) op->opval == (LONG) op->opval) {
+					if((LONG) (WORD) (UINTPTR) op->opval == (UINTPTR) op->opval) {
 						*p++ = '.';
 						*p++ = 'l';
 					}
@@ -3623,9 +3623,9 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 						case BYTESIZE:
 							{
 								UBYTE undefbyte = *(UBYTE *) (ptr + code->bytes);
-								op->opval = (address) (ULONG) * (UBYTE *) (ptr + code->bytes + 1);
+								op->opval = (address) (UINTPTR) * (UBYTE *) (ptr + code->bytes + 1);
 								IfNeedStr {
-									temp = (LONG) op->opval;
+									temp = (UINTPTR) op->opval;
 									*p++ = '#';
 									if(undefbyte == 0xff && (signed char)(UINTPTR) op->opval < 0) {
 										*p++ = '-';
@@ -3642,18 +3642,18 @@ private void setEA(disasm * code, operand * op, address ptr, int mode) {
 								return;
 							}
 						case WORDSIZE:
-							op->opval = (address) (ULONG) peekw(ptr + code->bytes);
+							op->opval = (address) (UINTPTR) peekw(ptr + code->bytes);
 							IfNeedStr {
 								*p++ = '#';
-								itox4d(p, (LONG) op->opval);
+								itox4d(p, (UINTPTR) op->opval);
 							}
 							code->bytes += 2;
 							return;
 						case LONGSIZE:
-							op->opval = (address) peekl(ptr + code->bytes);
+							op->opval = (address) (UINTPTR) peekl(ptr + code->bytes);
 							IfNeedStr {
 								*p++ = '#';
-								itox8d(p, (LONG) op->opval);
+								itox8d(p, (UINTPTR) op->opval);
 							}
 							code->bytes += 4;
 							return;

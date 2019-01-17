@@ -330,7 +330,7 @@ read_tablefile (char* filename)
 	if (c == '#' || c == '*' || c == ';')	/* comment */
 		continue;
 	if (isxdigit (c)) {
-		address tabletop = (address) atox (linebuf);
+		address tabletop = (address) (UINTPTR) atox (linebuf);
 
 		eprintfq ("Table(%x)\n", tabletop);
 		tablejob (tabletop, fp);

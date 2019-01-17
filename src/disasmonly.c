@@ -140,7 +140,7 @@ disasmlist (char* xfilename, char* sfilename, time_t filedate)
 	PCEND = pcend;
 	while (pc < pcend) {
 	char	adrs[8];
-	itox6 (adrs, (ULONG) pc);
+	itox6 (adrs, (UINTPTR) pc);
 	outputa (adrs);
 	pc += disasm1line (pc, pcend);
 	}

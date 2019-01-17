@@ -139,7 +139,7 @@ untilspace (unsigned char* ptr)
 static INLINE int
 get_line (char* linebuf, int line, int pass, address* adrs, char** symptrptr)
 {
-	address ad = (address) atox (linebuf);
+	address ad = (address) (UINTPTR) atox (linebuf);
 	unsigned char* ptr = skipspace (untilspace ((unsigned char*) linebuf));
 	opesize attr;
 

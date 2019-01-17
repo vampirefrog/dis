@@ -15,14 +15,16 @@
 #define __attribute__(x) /* NOTHING */
 #endif
 
-/* #include <class.h> */
-typedef unsigned char	UBYTE;
-typedef short		WORD;
-typedef unsigned short	UWORD;
-typedef long		LONG;
-typedef unsigned long	ULONG;
+#include <stdint.h>
+
+typedef uint8_t  UBYTE;
+typedef int16_t  WORD;
+typedef uint16_t UWORD;
+typedef int32_t  LONG;
+typedef uint32_t ULONG;
 
 typedef unsigned long UINTPTR;
+typedef long INTPTR;
 #define PRI_UINTPTR "lx"
 #define SIZEOF_ULONG 4
 

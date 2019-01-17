@@ -38,8 +38,8 @@ extern xheader	Head;
 extern os9header HeadOSK;
 #endif
 
-extern ULONG	Top;		/* ポインター同士の加算は出来ないので unsigned int */
-extern ULONG	Ofst;
+extern UINTPTR	Top;		/* ポインター同士の加算は出来ないので unsigned int */
+extern UINTPTR	Ofst;
 extern address	BeginTEXT,	/* = Head.base */
 		BeginDATA,	/* = Head.base + Head.text */
 		BeginBSS,	/* = Head.base + Head.text + Head.data */

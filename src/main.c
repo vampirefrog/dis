@@ -68,8 +68,8 @@ os9header HeadOSK;
 char	FileType;	/* ファイル形式(0,'x','r','z') */
 #endif
 
-ULONG	Top;		/* 実際にファイルのあるアドレス  */
-ULONG	Ofst;		/* 実際のアドレス - 仮想アドレス */
+UINTPTR	Top;		/* 実際にファイルのあるアドレス  */
+UINTPTR	Ofst;		/* 実際のアドレス - 仮想アドレス */
 
 /********************************************
   Human68K 用（-DOSKDIS 無）の場合は、
@@ -278,7 +278,7 @@ os9head_error:
 
 	if (read (handle, (char*) &zhead, sizeof (zhead)) != sizeof (zhead))
 		goto filetype_error;
-	Head.exec = Head.base = (address) peekl (&zhead.base);
+	Head.exec = Head.base = (address) (UINTPTR) peekl (&zhead.base);
 	Head.text = peekl (&zhead.text);
 	Head.data = peekl (&zhead.data);
 	Head.bss  = peekl (&zhead.bss);
@@ -310,8 +310,8 @@ filetype_error:
 	Head.offset = peekl (&Head.offset);
 	Head.symbol = peekl (&Head.symbol);
 
-	Head.base = (address) peekl (&fh.base);
-	Head.exec = (address) peekl (&fh.exec);
+	Head.base = (address) (UINTPTR) peekl (&fh.base);
+	Head.exec = (address) (UINTPTR) peekl (&fh.exec);
 #else
 	Head.base = (address)fh.base;
 	Head.exec = (address)fh.exec;
@@ -359,8 +359,8 @@ main (int argc, char* argv[])
 	eprintf ("Loading %s.\n", Filename_in);
 
 	/* アドレス関係の大域変数を初期化 */
-	Top = (ULONG)loadfile (Filename_in);
-	Ofst = Top - (ULONG)Head.base;
+	Top = (UINTPTR)loadfile (Filename_in);
+	Ofst = Top - (UINTPTR)Head.base;
 	BeginTEXT = Head.base;
 
 #ifdef	OSKDIS
@@ -490,7 +490,7 @@ main (int argc, char* argv[])
 private void
 analyze_device (void)
 {
-	ULONG ad = 0;
+	UINTPTR ad = 0;
 
 	Reason_verbose = (Verbose >= 1) ? TRUE : FALSE;
 
@@ -506,12 +506,12 @@ analyze_device (void)
 
 	analyze (*(address*) (Ofst + ad + 6  ), ANALYZE_IGNOREFAULT);
 	analyze (*(address*) (Ofst + ad + 0xa), ANALYZE_IGNOREFAULT);
-	ad = *(ULONG*) (ad + Ofst);
+	ad = *(UINTPTR*) (ad + Ofst);
 	} while (((long)ad & 1) == 0
 #if 0
 		&& (ad != (address)-1)		/* 不要 */
 #endif
-		&& (ad < (ULONG)BeginBSS));	/* SCSIDRV.SYS 対策 */
+		&& (ad < (UINTPTR)BeginBSS));	/* SCSIDRV.SYS 対策 */
 }
 #endif	/* OSKDIS */
 

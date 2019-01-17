@@ -333,7 +333,7 @@ newline (address lineadrs)
 		*OutputBufferEnd++ = '\t';
 		*OutputBufferEnd++ = CommentChar;
 
-		OutputBufferEnd = itox6 (OutputBufferEnd, (ULONG)lineadrs);
+		OutputBufferEnd = itox6 (OutputBufferEnd, (UINTPTR)lineadrs);
 		linecount = 1;
 	}
 	else

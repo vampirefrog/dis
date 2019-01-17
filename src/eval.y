@@ -416,7 +416,7 @@ tabledesc (int num, opesize id)
 	switch (id) {
 	case LONGSIZE:
 		if (depend_address (Eval_PC))
-		make_proper_symbol (bufptr, (address) PEEK_LONG (Eval_PC));
+		make_proper_symbol (bufptr, (address) (UINTPTR) PEEK_LONG (Eval_PC));
 		else
 		itoxd_by_size (bufptr, PEEK_LONG (Eval_PC), id);
 		break;
@@ -453,7 +453,7 @@ tabledesc (int num, opesize id)
 		if (ExpStack[i]->registed)
 			make_proper_symbol (bufptr, val);
 		else
-			itoxd_by_size (bufptr, (ULONG) val, Eval_ID);
+			itoxd_by_size (bufptr, (UINTPTR) val, Eval_ID);
 		} else {
 		strcat (Eval_ResultString, ExpStack[i]->bufptr);
 		free (ExpStack[i]->bufptr);
