@@ -24,6 +24,7 @@ typedef unsigned long	ULONG;
 
 typedef unsigned long UINTPTR;
 #define PRI_UINTPTR "lx"
+#define SIZEOF_ULONG 4
 
 #ifdef	TRUE
 #undef	TRUE

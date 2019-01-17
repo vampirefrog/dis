@@ -894,9 +894,9 @@ private void dataout(address pc, ULONG byte, opesize size) {
 			return;
 
 		case LONGSIZE:
-			if(odd_flag || (byte % sizeof(ULONG)))
+			if(odd_flag || (byte % SIZEOF_ULONG))
 				break;
-			if(byte == sizeof(ULONG)) {
+			if(byte == SIZEOF_ULONG) {
 				output_opecode(PSEUDO DC_L);
 #if 0
 				outputax8_without_0supress(peekl(store));
@@ -1071,7 +1071,7 @@ private void longout(address pc, ULONG byte) {
 	address store = pc + Ofst;
 
 #ifndef OSKDIS
-	if((byte >= sizeof(ULONG) * 2) && Compress_len && (byte >= Compress_len)) {
+	if((byte >= SIZEOF_ULONG * 2) && Compress_len && (byte >= Compress_len)) {
 		ULONG *ptr = (ULONG *) store;
 		int val = peekl(ptr);
 
@@ -1080,10 +1080,10 @@ private void longout(address pc, ULONG byte) {
 		if((address) ptr == store + byte) {
 			if(val == 0) {
 				output_opecode(PSEUDO DS_L);
-				outputfa("%d", byte / sizeof(ULONG));
+				outputfa("%d", byte / SIZEOF_ULONG);
 			} else {
 				output_opecode(PSEUDO DCB_L);
-				outputfa("%d,", byte / sizeof(ULONG));
+				outputfa("%d,", byte / SIZEOF_ULONG);
 				outputax8_without_0supress(val);
 			}
 			newline(pc);
@@ -1093,22 +1093,22 @@ private void longout(address pc, ULONG byte) {
 #endif /* !OSKDIS */
 
 	{
-		int datawidth = (Data_width + sizeof(ULONG) - 1) / sizeof(ULONG);
-		ULONG max = (byte / sizeof(ULONG) - 1) / datawidth;
-		ULONG mod = (byte / sizeof(ULONG) - 1) % datawidth;
+		int datawidth = (Data_width + SIZEOF_ULONG - 1) / SIZEOF_ULONG;
+		ULONG max = (byte / SIZEOF_ULONG - 1) / datawidth;
+		ULONG mod = (byte / SIZEOF_ULONG - 1) % datawidth;
 		int i, j;
 
 		for(i = 0; i <= max; i++) {
 			output_opecode(PSEUDO DC_L);
 			for(j = 1; j < (i == max ? mod + 1 : datawidth); j++) {
 				outputax8_without_0supress(peekl(store));
-				store += sizeof(ULONG);
+				store += SIZEOF_ULONG;
 				outputca(',');
 			}
 			outputax8_without_0supress(peekl(store));
-			store += sizeof(ULONG);
+			store += SIZEOF_ULONG;
 			newline(pc);
-			pc += datawidth * sizeof(ULONG);
+			pc += datawidth * SIZEOF_ULONG;
 		}
 	}
 }
@@ -1482,11 +1482,11 @@ private void rellonggen(address pc, address pcend) {
 */
 private void zgen(address pc, address pcend) {
 	address store;
-	address limit = pcend + Ofst - sizeof(ULONG);
+	address limit = pcend + Ofst - SIZEOF_ULONG;
 
 	charout('z');
 
-	for(store = pc + Ofst; store <= limit; store += sizeof(ULONG)) {
+	for(store = pc + Ofst; store <= limit; store += SIZEOF_ULONG) {
 		char work[128];
 		address label = (address) peekl(store);
 		char *p;
