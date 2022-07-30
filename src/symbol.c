@@ -74,7 +74,7 @@ output_symbol_table (const char* op_equ, const char* op_xdef, const char* colon)
 {
 	char* ptr = (char*)(Top + Head.text + Head.data + Head.offset);
 	UINTPTR end = (UINTPTR)ptr + Head.symbol
-		  - (sizeof (UWORD) + sizeof (address) + 2);
+		  - (sizeof (UWORD) + sizeof (ULONG) + 2);
 	int out_xdef = (Output_Symbol == 2);
 	int count = 0;
 
@@ -88,7 +88,7 @@ output_symbol_table (const char* op_equ, const char* op_xdef, const char* colon)
 	type = peekw (ptr);
 	ptr += sizeof (UWORD);
 	adrs = (address) (UINTPTR) peekl (ptr);
-	ptr += sizeof (address);
+	ptr += sizeof (ULONG);
 
 	if (*ptr && *ptr != (char)'*') {
 		char buf[16];
@@ -161,7 +161,7 @@ make_symtable (void)
 {
 	char* ptr = (char*)(Top + Head.text + Head.data + Head.offset);
 	UINTPTR end = (UINTPTR)ptr + Head.symbol
-		  - (sizeof (UWORD) + sizeof (address) + 2);
+		  - (sizeof (UWORD) + sizeof (ULONG) + 2);
 
 	if ((UINTPTR)ptr & 1)
 	return;
@@ -173,7 +173,7 @@ make_symtable (void)
 	type = peekw (ptr);
 	ptr += sizeof (UWORD);
 	adrs = (address) (UINTPTR) peekl (ptr);
-	ptr += sizeof (address);
+	ptr += sizeof (ULONG);
 
 	if (!*ptr) {
 #if 0
