@@ -1,6 +1,8 @@
 Source code generator for X680x0 version 3.16
 =============================================
 
+![Linux Build](https://github.com/vampirefrog/dis/actions/workflows/linux-build.yml/badge.svg)
+
 ```text
 Copyright (C)1989-1992 K.Abe
 Copyright (C)1994-1997 R.ShimiZu
