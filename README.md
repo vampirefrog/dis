@@ -35,5 +35,5 @@ make -f ports/Makefile_Linux install
 
 Links
 -----
-* [X68K binaries](https://nfggames.com/X68000/Mirrors/x68pub/x68tools/PROGRAM/DIS/)
+* [X68K binaries](https://nfggames.com/X68000/index.php/Mirrors/x68pub/x68tools/PROGRAM/DIS/)
 * [rururutan software](http://www.vesta.dti.ne.jp/~tsato/software.html)
